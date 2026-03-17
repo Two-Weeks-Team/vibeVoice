@@ -1,0 +1,10 @@
+badge.tsx
+button.tsx
+card.tsx
+label.tsx
+scroll-area.tsx
+select.tsx
+separator.tsx
+slider.tsx
+sonner.tsx
+textarea.tsx
