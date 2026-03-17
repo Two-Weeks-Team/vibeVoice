@@ -129,7 +129,7 @@ npx next lint                     # Zero lint errors
 
 ## TODOs
 
-- [ ] 1. Project Scaffold — Next.js + Tailwind + shadcn/ui + Test Infra
+- [x] 1. Project Scaffold — Next.js + Tailwind + shadcn/ui + Test Infra
 
   **What to do**:
   1. Run `npx create-next-app@latest . --typescript --tailwind --app --src-dir --import-alias "@/*" --eslint --no-git` in the project root (`/Users/sgwannabe/2026/vibeVoice`)
@@ -254,7 +254,7 @@ npx next lint                     # Zero lint errors
 
   **Commit**: YES | Message: `feat: scaffold Next.js project with TypeScript, Tailwind, shadcn/ui, Vitest, Playwright` | Files: [all scaffold files]
 
-- [ ] 2. API Route `/api/t2a` — MiniMax Proxy with Validation (TDD)
+- [x] 2. API Route `/api/t2a` — MiniMax Proxy with Validation (TDD)
 
   **What to do**:
   1. **Write tests FIRST** in `src/__tests__/api/t2a.test.ts`:
@@ -425,7 +425,7 @@ npx next lint                     # Zero lint errors
 
   **Commit**: YES | Message: `feat(api): add /api/t2a proxy route with TDD validation and MiniMax error mapping` | Files: [src/app/api/t2a/route.ts, src/__tests__/api/t2a.test.ts]
 
-- [ ] 3. Shared Types + Constants
+- [x] 3. Shared Types + Constants
 
   **What to do**:
   1. Create `src/lib/types.ts` with all TypeScript interfaces:
@@ -585,7 +585,7 @@ npx next lint                     # Zero lint errors
 
   **Commit**: YES | Message: `feat: add shared TypeScript types, constants, and error mappings` | Files: [src/lib/types.ts, src/lib/constants.ts, src/lib/errors.ts]
 
-- [ ] 4. `useLocalStorage` Hook + `useHistory` Hook (TDD)
+- [x] 4. `useLocalStorage` Hook + `useHistory` Hook (TDD)
 
   **What to do**:
   1. **Write tests FIRST** in `src/__tests__/hooks/useLocalStorage.test.ts`:
@@ -710,7 +710,7 @@ npx next lint                     # Zero lint errors
 
   **Commit**: YES | Message: `feat: add SSR-safe useLocalStorage and useHistory hooks with TDD tests` | Files: [src/hooks/useLocalStorage.ts, src/hooks/useHistory.ts, src/__tests__/hooks/useLocalStorage.test.ts, src/__tests__/hooks/useHistory.test.ts]
 
-- [ ] 5. `TextInputPanel` Component
+- [x] 5. `TextInputPanel` Component
 
   **What to do**:
   1. Create `src/components/TextInputPanel.tsx`:
@@ -798,7 +798,7 @@ npx next lint                     # Zero lint errors
 
   **Commit**: YES | Message: `feat(ui): add TextInputPanel component with char count and generate button` | Files: [src/components/TextInputPanel.tsx, src/__tests__/components/TextInputPanel.test.tsx]
 
-- [ ] 6. `VoiceSettingsPanel` Component
+- [x] 6. `VoiceSettingsPanel` Component
 
   **What to do**:
   1. Create `src/components/VoiceSettingsPanel.tsx`:
@@ -870,7 +870,7 @@ npx next lint                     # Zero lint errors
 
   **Commit**: YES | Message: `feat(ui): add VoiceSettingsPanel with speed/vol/pitch sliders and emotion/format selects` | Files: [src/components/VoiceSettingsPanel.tsx, src/__tests__/components/VoiceSettingsPanel.test.tsx]
 
-- [ ] 7. `AudioPlayer` Component
+- [x] 7. `AudioPlayer` Component
 
   **What to do**:
   1. Create `src/components/AudioPlayer.tsx`:
@@ -933,7 +933,7 @@ npx next lint                     # Zero lint errors
 
   **Commit**: YES | Message: `feat(ui): add AudioPlayer with native audio element and download button` | Files: [src/components/AudioPlayer.tsx, src/__tests__/components/AudioPlayer.test.tsx]
 
-- [ ] 8. `GenerationHistory` Component
+- [x] 8. `GenerationHistory` Component
 
   **What to do**:
   1. Create `src/components/GenerationHistory.tsx`:
@@ -1004,7 +1004,7 @@ npx next lint                     # Zero lint errors
 
   **Commit**: YES | Message: `feat(ui): add GenerationHistory with expiry detection, relative time, and clear button` | Files: [src/components/GenerationHistory.tsx, src/__tests__/components/GenerationHistory.test.tsx, src/lib/utils.ts]
 
-- [ ] 9. Main Page Integration — Wire All Components Together
+- [x] 9. Main Page Integration — Wire All Components Together
 
   **What to do**:
   1. Implement `src/app/page.tsx` as the main dashboard page:
