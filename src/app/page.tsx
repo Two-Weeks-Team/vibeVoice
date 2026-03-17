@@ -103,12 +103,12 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b">
-        <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
+      <header className="border-b backdrop-blur-sm bg-background/80 sticky top-0 z-50">
+        <div className="mx-auto max-w-7xl px-4 py-3 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-xl font-semibold tracking-tight">VibeVoice</h1>
-              <p className="text-sm text-muted-foreground">
+              <h1 className="text-lg font-semibold tracking-tight">VibeVoice</h1>
+              <p className="text-xs text-muted-foreground">
                 Text-to-Audio powered by MiniMax
               </p>
             </div>
@@ -132,8 +132,8 @@ export default function Home() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+      <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
           <div className="space-y-4">
             <TextInputPanel
               text={text}

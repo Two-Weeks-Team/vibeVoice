@@ -28,9 +28,9 @@ export function AudioPlayer({ audioResult, format }: AudioPlayerProps) {
 
   return (
     <Card>
-      <CardHeader className="pb-3">
+      <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
-          <CardTitle>Audio Output</CardTitle>
+          <CardTitle className="text-sm font-semibold tracking-tight">Audio Output</CardTitle>
           <div className="flex items-center gap-2">
             {durationMs !== undefined && (
               <span className="text-xs text-muted-foreground tabular-nums">

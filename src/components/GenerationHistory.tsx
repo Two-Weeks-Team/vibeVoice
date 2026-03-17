@@ -85,9 +85,9 @@ export function GenerationHistory({
 
   return (
     <Card>
-      <CardHeader className="pb-3">
+      <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-base font-medium">
+          <CardTitle className="text-sm font-semibold tracking-tight">
             History
             {history.length > 0 && (
               <span className="ml-2 text-xs font-normal text-muted-foreground">
@@ -179,7 +179,7 @@ export function GenerationHistory({
                             )}
                           </span>
                         )}
-                        <p className="line-clamp-2 text-sm">
+                        <p className="line-clamp-2 text-[13px] leading-snug">
                           {entry.textPreview}
                         </p>
                       </div>
@@ -201,10 +201,10 @@ export function GenerationHistory({
                         )}
                       </div>
                     </div>
-                    <p className="mt-1 text-xs text-muted-foreground/80 truncate">
+                    <p className="mt-1 text-[11px] text-muted-foreground/80 truncate">
                       {formatSettingsSummary(entry)}
                     </p>
-                    <p className="mt-0.5 text-xs text-muted-foreground">
+                    <p className="mt-0.5 text-[11px] text-muted-foreground">
                       {formatRelativeTime(entry.generatedAt)}
                     </p>
                   </div>

@@ -23,7 +23,7 @@ export function TextInputPanel({ text, onChange, onGenerate, isLoading }: TextIn
   return (
     <div className="space-y-4">
       <div className="space-y-2">
-        <Label htmlFor="script-input" className="text-sm font-medium">
+        <Label htmlFor="script-input" className="text-[13px] font-medium text-foreground">
           Script
         </Label>
         <Textarea
@@ -54,7 +54,7 @@ export function TextInputPanel({ text, onChange, onGenerate, isLoading }: TextIn
         onClick={onGenerate}
         disabled={!canGenerate}
         className="w-full"
-        size="lg"
+        size="default"
       >
         {isLoading ? (
           <>

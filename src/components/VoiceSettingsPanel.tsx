@@ -53,14 +53,14 @@ export function VoiceSettingsPanel({
 }: VoiceSettingsPanelProps) {
   return (
     <Card>
-      <CardHeader className="pb-3">
-        <CardTitle className="text-base font-medium">Voice Settings</CardTitle>
+      <CardHeader className="pb-2">
+        <CardTitle className="text-sm font-semibold tracking-tight">Voice Settings</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-5">
+      <CardContent className="space-y-4">
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <Label className="text-sm">Speed</Label>
-            <span className="text-sm text-muted-foreground tabular-nums">
+            <Label className="text-[13px] font-medium text-foreground">Speed</Label>
+            <span className="text-xs text-muted-foreground tabular-nums">
               {voiceSettings.speed.toFixed(1)}x
             </span>
           </div>
@@ -80,8 +80,8 @@ export function VoiceSettingsPanel({
 
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <Label className="text-sm">Volume</Label>
-            <span className="text-sm text-muted-foreground tabular-nums">
+            <Label className="text-[13px] font-medium text-foreground">Volume</Label>
+            <span className="text-xs text-muted-foreground tabular-nums">
               {voiceSettings.vol.toFixed(1)}
             </span>
           </div>
@@ -101,8 +101,8 @@ export function VoiceSettingsPanel({
 
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <Label className="text-sm">Pitch</Label>
-            <span className="text-sm text-muted-foreground tabular-nums">
+            <Label className="text-[13px] font-medium text-foreground">Pitch</Label>
+            <span className="text-xs text-muted-foreground tabular-nums">
               {voiceSettings.pitch > 0
                 ? `+${voiceSettings.pitch}`
                 : voiceSettings.pitch}
@@ -125,7 +125,7 @@ export function VoiceSettingsPanel({
         <Separator />
 
         <div className="space-y-2">
-          <Label className="text-sm">Emotion</Label>
+          <Label className="text-[13px] font-medium text-foreground">Emotion</Label>
           <Select
             value={voiceSettings.emotion ?? AUTO_EMOTION_KEY}
             items={EMOTION_ITEM_LABELS}
@@ -156,7 +156,7 @@ export function VoiceSettingsPanel({
         </div>
 
         <div className="space-y-2">
-          <Label className="text-sm">Format</Label>
+          <Label className="text-[13px] font-medium text-foreground">Format</Label>
           <Select
             value={audioSettings.format}
             items={FORMAT_ITEM_LABELS}
@@ -181,7 +181,7 @@ export function VoiceSettingsPanel({
 
         {/* Voice Effects */}
         <div className="space-y-4">
-          <Label className="text-sm font-medium">Voice Effects</Label>
+          <Label className="text-[13px] font-medium text-foreground">Voice Effects</Label>
 
           {/* Effect Pitch: Deepen/Brighten */}
           <div className="space-y-2">

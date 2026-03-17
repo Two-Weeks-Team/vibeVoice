@@ -233,7 +233,7 @@ export function VoiceLibraryPanel({ selectedVoiceId, onVoiceSelect }: VoiceLibra
                   }
                 }}
                 className={cn(
-                  'w-full rounded-md border px-3 py-2 text-left text-sm transition-colors cursor-pointer',
+                  'w-full rounded-md border px-2.5 py-1.5 text-left text-sm transition-colors cursor-pointer',
                   isSelected
                     ? 'border-primary bg-primary/5 text-primary'
                     : 'hover:bg-accent'
@@ -262,7 +262,7 @@ export function VoiceLibraryPanel({ selectedVoiceId, onVoiceSelect }: VoiceLibra
                     ) : (
                       <>
                         <div className="flex items-center gap-1">
-                          <p className="truncate font-medium text-sm">
+                          <p className="truncate font-medium text-[13px]">
                             {formatVoiceLabel(voice, nicknames)}
                           </p>
                           {voiceType && (
@@ -290,11 +290,11 @@ export function VoiceLibraryPanel({ selectedVoiceId, onVoiceSelect }: VoiceLibra
                           )}
                         </div>
                         {voice.description && voice.description.length > 0 ? (
-                          <p className="truncate text-xs text-muted-foreground">
+                          <p className="truncate text-[11px] text-muted-foreground leading-snug">
                             {voice.description.join(' · ')}
                           </p>
                         ) : (
-                          <p className="truncate text-xs text-muted-foreground">
+                          <p className="truncate text-[11px] text-muted-foreground leading-snug">
                             {voice.created_time
                               ? `Created ${voice.created_time}`
                               : voice.voice_id.length > 20
@@ -377,9 +377,9 @@ export function VoiceLibraryPanel({ selectedVoiceId, onVoiceSelect }: VoiceLibra
 
   return (
     <Card>
-      <CardHeader className="pb-3">
+      <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-base font-medium">Voice Library</CardTitle>
+          <CardTitle className="text-sm font-semibold tracking-tight">Voice Library</CardTitle>
           <Button
             variant="ghost"
             size="icon"
