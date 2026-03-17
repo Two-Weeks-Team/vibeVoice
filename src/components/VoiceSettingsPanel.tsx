@@ -59,10 +59,23 @@ export function VoiceSettingsPanel({
 
   return (
     <Card>
-      <CardHeader className="pb-2">
-        <CardTitle className="text-sm font-semibold tracking-tight">Voice Settings</CardTitle>
+      <CardHeader className="pb-3">
+        <CardTitle className="text-base font-semibold tracking-tight">Voice Controls</CardTitle>
+        <p className="text-[12px] leading-5 text-muted-foreground">
+          Start with delivery and format. Open advanced effects only when you need to shape the tone further.
+        </p>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-5">
+        <div className="space-y-4 rounded-2xl border border-border/80 bg-muted/35 p-4">
+          <div className="space-y-1">
+            <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
+              Basic Settings
+            </p>
+            <p className="text-[13px] text-muted-foreground">
+              Tune pacing, level, tonal balance, emotion, and output format.
+            </p>
+          </div>
+
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <Label className="text-[13px] font-medium text-foreground">Speed</Label>
@@ -180,16 +193,27 @@ export function VoiceSettingsPanel({
                 </SelectItem>
               ))}
             </SelectContent>
-          </Select>
+            </Select>
+          </div>
         </div>
 
         <Separator />
+
+        <div className="space-y-3 rounded-2xl border border-border/80 bg-card p-4">
+          <div className="space-y-1">
+            <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
+              Advanced Effects
+            </p>
+            <p className="text-[13px] text-muted-foreground">
+              Push the voice brighter, softer, or more stylized when the base delivery is not enough.
+            </p>
+          </div>
 
         <div>
           <button
             type="button"
             onClick={() => setEffectsOpen(!effectsOpen)}
-            className="flex w-full items-center justify-between py-1"
+            className="flex w-full items-center justify-between rounded-xl border border-border/70 bg-muted/45 px-3 py-2.5"
           >
             <span className="text-[13px] font-medium text-foreground flex items-center gap-2">
               Voice Effects
@@ -201,7 +225,7 @@ export function VoiceSettingsPanel({
           </button>
         </div>
 
-        <div className={cn('space-y-4 overflow-hidden transition-all', effectsOpen ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0')}>
+        <div className={cn('space-y-4 overflow-hidden transition-all', effectsOpen ? 'max-h-[500px] pt-1 opacity-100' : 'max-h-0 opacity-0')}>
 
           {/* Effect Pitch: Deepen/Brighten */}
           <div className="space-y-2">
@@ -289,6 +313,7 @@ export function VoiceSettingsPanel({
               </SelectContent>
             </Select>
           </div>
+        </div>
         </div>
       </CardContent>
     </Card>
