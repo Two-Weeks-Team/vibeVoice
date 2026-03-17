@@ -1,0 +1,11 @@
+
+> vibevoice-temp@0.1.0 lint
+> eslint
+
+
+/Users/sgwannabe/2026/vibeVoice/src/__tests__/hooks/useHistory.test.ts
+  2:44  warning  'vi' is defined but never used  @typescript-eslint/no-unused-vars
+
+✖ 1 problem (0 errors, 1 warning)
+
+Exit: 0

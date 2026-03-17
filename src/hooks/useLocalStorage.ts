@@ -1,22 +1,29 @@
 'use client';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 
 export function useLocalStorage<T>(key: string, defaultValue: T) {
   const [value, setValue] = useState<T>(defaultValue);
+  const mountedRef = useRef(false);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
+    if (mountedRef.current) return;
+    mountedRef.current = true;
+    let parsed: T | undefined;
     try {
       const stored = localStorage.getItem(key);
       if (stored !== null) {
-        setValue(JSON.parse(stored) as T);
+        parsed = JSON.parse(stored) as T;
       }
     } catch {
       console.warn(`[useLocalStorage] Failed to parse key "${key}", clearing.`);
       localStorage.removeItem(key);
     }
-  }, [key]);
+    const finalValue = parsed !== undefined ? parsed : defaultValue;
+    setValue(finalValue);
+    setMounted(true);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const setAndPersist = useCallback(
     (newValue: T | ((prev: T) => T)) => {
