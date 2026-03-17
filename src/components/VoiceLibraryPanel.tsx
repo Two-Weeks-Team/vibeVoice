@@ -11,6 +11,31 @@ import { RefreshCw, Trash2, Mic, Wand2, Copy } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { VoiceInfo } from '@/lib/types';
 
+function formatVoiceLabel(voice: VoiceInfo): string {
+  if (voice.voice_name) return voice.voice_name;
+
+  const id = voice.voice_id;
+
+  // IDs like "Chinese (Mandarin)_Reliable_Executive" are already readable
+  if (/^[A-Z]/.test(id) && id.includes('_') && !id.includes('-')) {
+    return id.replace(/_/g, ' ');
+  }
+
+  // IDs like "moss_audio_XXXXX" → show "Voice ...{short suffix}"
+  if (id.startsWith('moss_audio_')) {
+    const suffix = id.slice(-8);
+    return `Voice ...${suffix}`;
+  }
+
+  // Other long IDs → shortened
+  if (id.length > 30) {
+    return `${id.slice(0, 12)}...${id.slice(-8)}`;
+  }
+
+  // Fallback: replace separators, title-case words
+  return id.replace(/[_-]/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
 interface VoiceLibraryPanelProps {
   selectedVoiceId: string;
   onVoiceSelect: (voiceId: string) => void;
@@ -98,9 +123,14 @@ export function VoiceLibraryPanel({ selectedVoiceId, onVoiceSelect }: VoiceLibra
                 <div className="flex items-center justify-between gap-2">
                   <div className="min-w-0 flex-1">
                     <p className="truncate font-medium text-sm">
-                      {voice.voice_name || voice.voice_id}
+                      {formatVoiceLabel(voice)}
                     </p>
-                    {voice.voice_name && (
+                    {voice.description && voice.description.length > 0 && (
+                      <p className="truncate text-xs text-muted-foreground">
+                        {voice.description.join(' · ')}
+                      </p>
+                    )}
+                    {!voice.description?.length && voice.voice_name && (
                       <p className="truncate text-xs text-muted-foreground">
                         {voice.voice_id}
                       </p>

@@ -8,6 +8,37 @@ import { Trash2, Clock } from 'lucide-react';
 import { cn, formatRelativeTime } from '@/lib/utils';
 import type { HistoryEntry } from '@/lib/types';
 
+function formatSettingsSummary(entry: HistoryEntry): string {
+  const parts: string[] = [];
+
+  const vid = entry.voiceSettings.voiceId;
+  if (vid.startsWith('moss_audio_')) {
+    parts.push(`Voice ...${vid.slice(-8)}`);
+  } else if (vid.length > 20) {
+    parts.push(`${vid.slice(0, 10)}...`);
+  } else {
+    parts.push(vid.replace(/_/g, ' '));
+  }
+
+  if (entry.voiceSettings.speed !== 1.0) {
+    parts.push(`${entry.voiceSettings.speed.toFixed(1)}x`);
+  }
+
+  if (entry.voiceSettings.pitch !== 0) {
+    parts.push(`Pitch ${entry.voiceSettings.pitch > 0 ? '+' : ''}${entry.voiceSettings.pitch}`);
+  }
+
+  if (entry.voiceSettings.vol !== 1.0) {
+    parts.push(`Vol ${entry.voiceSettings.vol.toFixed(1)}`);
+  }
+
+  if (entry.voiceSettings.emotion) {
+    parts.push(entry.voiceSettings.emotion.charAt(0).toUpperCase() + entry.voiceSettings.emotion.slice(1));
+  }
+
+  return parts.join(' · ');
+}
+
 interface GenerationHistoryProps {
   history: HistoryEntry[];
   onSelect: (entry: HistoryEntry) => void;
@@ -99,7 +130,10 @@ export function GenerationHistory({
                         )}
                       </div>
                     </div>
-                    <p className="mt-1 text-xs text-muted-foreground">
+                    <p className="mt-1 text-xs text-muted-foreground/80 truncate">
+                      {formatSettingsSummary(entry)}
+                    </p>
+                    <p className="mt-0.5 text-xs text-muted-foreground">
                       {formatRelativeTime(entry.generatedAt)}
                     </p>
                   </button>
