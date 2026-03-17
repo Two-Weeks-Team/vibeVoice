@@ -24,6 +24,7 @@ export function VoiceCloneDialog({ onVoiceCloned }: VoiceCloneDialogProps) {
   const [open, setOpen] = useState(false);
   const [file, setFile] = useState<File | null>(null);
   const [voiceId, setVoiceId] = useState('');
+  const [displayName, setDisplayName] = useState('');
   const [noiseReduction, setNoiseReduction] = useState(false);
   const [volumeNorm, setVolumeNorm] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
@@ -115,6 +116,12 @@ export function VoiceCloneDialog({ onVoiceCloned }: VoiceCloneDialogProps) {
         return;
       }
       setCloneSuccess(true);
+      try {
+        const nicknamesRaw = localStorage.getItem('vibeVoice:voiceNicknames');
+        const nicknames = nicknamesRaw ? JSON.parse(nicknamesRaw) : {};
+        nicknames[voiceId.trim()] = displayName.trim() || voiceId.trim();
+        localStorage.setItem('vibeVoice:voiceNicknames', JSON.stringify(nicknames));
+      } catch {}
       toast.success(`Voice "${voiceId}" cloned successfully!`);
       onVoiceCloned?.(voiceId);
     } catch {
@@ -129,6 +136,7 @@ export function VoiceCloneDialog({ onVoiceCloned }: VoiceCloneDialogProps) {
     setTimeout(() => {
       setFile(null);
       setVoiceId('');
+      setDisplayName('');
       setNoiseReduction(false);
       setVolumeNorm(false);
       setIsUploading(false);
@@ -234,6 +242,19 @@ export function VoiceCloneDialog({ onVoiceCloned }: VoiceCloneDialogProps) {
                     Invalid voice ID format
                   </p>
                 )}
+              </div>
+
+              <div className="space-y-2">
+                <Label>Display Name <span className="text-muted-foreground">(optional)</span></Label>
+                <Input
+                  value={displayName}
+                  onChange={(e) => setDisplayName(e.target.value)}
+                  placeholder="e.g., My Brand Voice"
+                  disabled={isCloning || cloneSuccess}
+                />
+                <p className="text-xs text-muted-foreground">
+                  A friendly name shown in Voice Library. Defaults to Voice ID if empty.
+                </p>
               </div>
 
               <div className="flex items-center justify-between rounded-md border p-3">

@@ -64,6 +64,12 @@ export function VoiceDesignDialog({ onVoiceCreated }: VoiceDesignDialogProps) {
 
       const audioUrl = data.trialAudioHex ? hexToAudioUrl(data.trialAudioHex) : null;
       setResult({ voiceId: data.voiceId, audioUrl });
+      try {
+        const nicknamesRaw = localStorage.getItem('vibeVoice:voiceNicknames');
+        const nicknames = nicknamesRaw ? JSON.parse(nicknamesRaw) : {};
+        nicknames[data.voiceId] = prompt.trim().slice(0, 50);
+        localStorage.setItem('vibeVoice:voiceNicknames', JSON.stringify(nicknames));
+      } catch {}
       toast.success(`Voice "${data.voiceId}" created!`);
       onVoiceCreated?.(data.voiceId);
     } catch {

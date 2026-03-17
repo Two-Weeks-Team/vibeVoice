@@ -11,28 +11,27 @@ import { RefreshCw, Trash2, Mic, Wand2, Copy } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { VoiceInfo } from '@/lib/types';
 
-function formatVoiceLabel(voice: VoiceInfo): string {
+function formatVoiceLabel(voice: VoiceInfo, nicknames: Record<string, string>): string {
+  const nickname = nicknames[voice.voice_id];
+  if (nickname) return nickname;
+
   if (voice.voice_name) return voice.voice_name;
 
   const id = voice.voice_id;
 
-  // IDs like "Chinese (Mandarin)_Reliable_Executive" are already readable
   if (/^[A-Z]/.test(id) && id.includes('_') && !id.includes('-')) {
     return id.replace(/_/g, ' ');
   }
 
-  // IDs like "moss_audio_XXXXX" → show "Voice ...{short suffix}"
   if (id.startsWith('moss_audio_')) {
     const suffix = id.slice(-8);
     return `Voice ...${suffix}`;
   }
 
-  // Other long IDs → shortened
   if (id.length > 30) {
     return `${id.slice(0, 12)}...${id.slice(-8)}`;
   }
 
-  // Fallback: replace separators, title-case words
   return id.replace(/[_-]/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
@@ -47,6 +46,14 @@ export function VoiceLibraryPanel({ selectedVoiceId, onVoiceSelect }: VoiceLibra
   const [designedVoices, setDesignedVoices] = useState<VoiceInfo[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [nicknames, setNicknames] = useState<Record<string, string>>({});
+
+  const loadNicknames = useCallback(() => {
+    try {
+      const raw = localStorage.getItem('vibeVoice:voiceNicknames');
+      if (raw) setNicknames(JSON.parse(raw));
+    } catch {}
+  }, []);
 
   const fetchVoices = useCallback(async () => {
     setIsLoading(true);
@@ -60,12 +67,13 @@ export function VoiceLibraryPanel({ selectedVoiceId, onVoiceSelect }: VoiceLibra
       setSystemVoices(data.systemVoices ?? []);
       setClonedVoices(data.clonedVoices ?? []);
       setDesignedVoices(data.designedVoices ?? []);
+      loadNicknames();
     } catch {
       toast.error('Network error fetching voices');
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [loadNicknames]);
 
   useEffect(() => {
     fetchVoices();
@@ -85,6 +93,15 @@ export function VoiceLibraryPanel({ selectedVoiceId, onVoiceSelect }: VoiceLibra
         return;
       }
       toast.success('Voice deleted');
+      try {
+        const nicknamesRaw = localStorage.getItem('vibeVoice:voiceNicknames');
+        if (nicknamesRaw) {
+          const nicks = JSON.parse(nicknamesRaw);
+          delete nicks[voiceId];
+          localStorage.setItem('vibeVoice:voiceNicknames', JSON.stringify(nicks));
+          setNicknames(nicks);
+        }
+      } catch {}
       fetchVoices();
     } catch {
       toast.error('Network error deleting voice');
@@ -123,16 +140,20 @@ export function VoiceLibraryPanel({ selectedVoiceId, onVoiceSelect }: VoiceLibra
                 <div className="flex items-center justify-between gap-2">
                   <div className="min-w-0 flex-1">
                     <p className="truncate font-medium text-sm">
-                      {formatVoiceLabel(voice)}
+                      {formatVoiceLabel(voice, nicknames)}
                     </p>
                     {voice.description && voice.description.length > 0 && (
                       <p className="truncate text-xs text-muted-foreground">
                         {voice.description.join(' · ')}
                       </p>
                     )}
-                    {!voice.description?.length && voice.voice_name && (
+                    {(!voice.description || voice.description.length === 0) && (
                       <p className="truncate text-xs text-muted-foreground">
-                        {voice.voice_id}
+                        {voice.created_time
+                          ? `Created ${voice.created_time}`
+                          : voice.voice_id.length > 20
+                            ? `${voice.voice_id.slice(0, 16)}...`
+                            : voice.voice_id}
                       </p>
                     )}
                   </div>
