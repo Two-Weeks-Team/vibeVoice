@@ -45,7 +45,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
   if (body.vol !== undefined) {
     const vol = Number(body.vol);
-    if (isNaN(vol) || vol <= 0 || vol > 10) {
+    if (isNaN(vol) || vol < 0.1 || vol > 10) {
       return NextResponse.json({ error: 'vol must be between 0.1 and 10' }, { status: 400 });
     }
   }
