@@ -1,10 +1,11 @@
 'use client';
 
+import { useState, useRef, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Trash2, Clock } from 'lucide-react';
+import { Trash2, Clock, Play, Square } from 'lucide-react';
 import { cn, formatRelativeTime } from '@/lib/utils';
 import type { HistoryEntry } from '@/lib/types';
 
@@ -52,6 +53,36 @@ export function GenerationHistory({
   onClear,
   isExpired,
 }: GenerationHistoryProps) {
+  const [playingId, setPlayingId] = useState<string | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  useEffect(() => {
+    return () => {
+      audioRef.current?.pause();
+    };
+  }, []);
+
+  const handlePlay = (entry: HistoryEntry) => {
+    if (playingId === entry.id) {
+      audioRef.current?.pause();
+      if (audioRef.current) audioRef.current.currentTime = 0;
+      setPlayingId(null);
+      return;
+    }
+
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+    }
+
+    const audio = new Audio(entry.audioUrl);
+    audioRef.current = audio;
+    setPlayingId(entry.id);
+    audio.play().catch(() => setPlayingId(null));
+    audio.onended = () => setPlayingId(null);
+    audio.onerror = () => setPlayingId(null);
+  };
+
   return (
     <Card>
       <CardHeader className="pb-3">
@@ -95,12 +126,20 @@ export function GenerationHistory({
             <div className="space-y-2 pr-3">
               {history.map((entry) => {
                 const expired = isExpired(entry);
+                const isPlaying = playingId === entry.id;
                 return (
-                  <button
+                  <div
                     key={entry.id}
                     data-testid={`history-item-${entry.id}`}
+                    role="button"
+                    tabIndex={0}
                     onClick={() => !expired && onSelect(entry)}
-                    disabled={expired}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        if (!expired) onSelect(entry);
+                      }
+                    }}
                     className={cn(
                       'w-full rounded-lg border p-3 text-left transition-colors',
                       expired
@@ -109,9 +148,41 @@ export function GenerationHistory({
                     )}
                   >
                     <div className="flex items-start justify-between gap-2">
-                      <p className="line-clamp-2 flex-1 text-sm">
-                        {entry.textPreview}
-                      </p>
+                      <div className="flex items-start gap-2 min-w-0 flex-1">
+                        {!expired && (
+                          <span
+                            role="button"
+                            tabIndex={0}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handlePlay(entry);
+                            }}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter' || e.key === ' ') {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                handlePlay(entry);
+                              }
+                            }}
+                            className={cn(
+                              'mt-0.5 flex-shrink-0 inline-flex items-center justify-center h-6 w-6 rounded-full transition-colors cursor-pointer',
+                              isPlaying
+                                ? 'bg-primary text-primary-foreground'
+                                : 'bg-muted text-muted-foreground hover:bg-primary/10 hover:text-primary'
+                            )}
+                            aria-label={isPlaying ? 'Stop' : 'Play'}
+                          >
+                            {isPlaying ? (
+                              <Square className="h-2.5 w-2.5" />
+                            ) : (
+                              <Play className="h-2.5 w-2.5 ml-0.5" />
+                            )}
+                          </span>
+                        )}
+                        <p className="line-clamp-2 text-sm">
+                          {entry.textPreview}
+                        </p>
+                      </div>
                       <div className="flex flex-shrink-0 flex-col items-end gap-1">
                         <Badge
                           variant="outline"
@@ -136,7 +207,7 @@ export function GenerationHistory({
                     <p className="mt-0.5 text-xs text-muted-foreground">
                       {formatRelativeTime(entry.generatedAt)}
                     </p>
-                  </button>
+                  </div>
                 );
               })}
             </div>
