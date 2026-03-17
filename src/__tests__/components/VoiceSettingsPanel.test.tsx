@@ -1,14 +1,16 @@
 import { render, screen } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 import { VoiceSettingsPanel } from '@/components/VoiceSettingsPanel';
-import { DEFAULT_VOICE_SETTINGS, DEFAULT_AUDIO_SETTINGS, EMOTIONS } from '@/lib/constants';
+import { DEFAULT_VOICE_SETTINGS, DEFAULT_AUDIO_SETTINGS, DEFAULT_VOICE_MODIFY, EMOTIONS } from '@/lib/constants';
 
 describe('VoiceSettingsPanel', () => {
   const defaultProps = {
     voiceSettings: DEFAULT_VOICE_SETTINGS,
     audioSettings: DEFAULT_AUDIO_SETTINGS,
+    voiceModify: DEFAULT_VOICE_MODIFY,
     onVoiceChange: vi.fn(),
     onAudioChange: vi.fn(),
+    onVoiceModifyChange: vi.fn(),
   };
 
   it('renders speed slider with data-testid="speed-slider"', () => {

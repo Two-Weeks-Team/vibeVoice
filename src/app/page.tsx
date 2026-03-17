@@ -6,16 +6,21 @@ import { TextInputPanel } from '@/components/TextInputPanel';
 import { VoiceSettingsPanel } from '@/components/VoiceSettingsPanel';
 import { AudioPlayer } from '@/components/AudioPlayer';
 import { GenerationHistory } from '@/components/GenerationHistory';
+import { VoiceLibraryPanel } from '@/components/VoiceLibraryPanel';
+import { VoiceDesignDialog } from '@/components/VoiceDesignDialog';
+import { VoiceCloneDialog } from '@/components/VoiceCloneDialog';
 import { useHistory } from '@/hooks/useHistory';
-import { DEFAULT_VOICE_SETTINGS, DEFAULT_AUDIO_SETTINGS } from '@/lib/constants';
-import type { VoiceSettings, AudioSettings, GenerationResult, HistoryEntry } from '@/lib/types';
+import { DEFAULT_VOICE_SETTINGS, DEFAULT_AUDIO_SETTINGS, DEFAULT_VOICE_MODIFY } from '@/lib/constants';
+import type { VoiceSettings, AudioSettings, VoiceModify, GenerationResult, HistoryEntry } from '@/lib/types';
 
 export default function Home() {
   const [text, setText] = useState('');
   const [voiceSettings, setVoiceSettings] = useState<VoiceSettings>(DEFAULT_VOICE_SETTINGS);
   const [audioSettings, setAudioSettings] = useState<AudioSettings>(DEFAULT_AUDIO_SETTINGS);
+  const [voiceModify, setVoiceModify] = useState<VoiceModify>(DEFAULT_VOICE_MODIFY);
   const [isLoading, setIsLoading] = useState(false);
   const [currentAudio, setCurrentAudio] = useState<GenerationResult | null>(null);
+  const [voiceLibraryKey, setVoiceLibraryKey] = useState(0);
   const { history, addItem, clearHistory, isExpired, mounted } = useHistory();
 
   const handleGenerate = async () => {
@@ -32,6 +37,9 @@ export default function Home() {
           pitch: voiceSettings.pitch,
           emotion: voiceSettings.emotion,
           format: audioSettings.format,
+          ...(voiceModify.pitch !== 0 || voiceModify.intensity !== 0 || voiceModify.timbre !== 0 || voiceModify.soundEffect
+            ? { voiceModify }
+            : {}),
         }),
       });
 
@@ -70,6 +78,14 @@ export default function Home() {
     }
   };
 
+  const handleVoiceSelect = (voiceId: string) => {
+    setVoiceSettings(prev => ({ ...prev, voiceId }));
+  };
+
+  const handleVoiceCreatedOrCloned = () => {
+    setVoiceLibraryKey(prev => prev + 1);
+  };
+
   const handleHistorySelect = (entry: HistoryEntry) => {
     setCurrentAudio({
       audioUrl: entry.audioUrl,
@@ -87,12 +103,16 @@ export default function Home() {
     <div className="min-h-screen bg-background">
       <header className="border-b">
         <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center justify-between">
             <div>
               <h1 className="text-xl font-semibold tracking-tight">VibeVoice</h1>
               <p className="text-sm text-muted-foreground">
                 Text-to-Audio powered by MiniMax
               </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <VoiceDesignDialog onVoiceCreated={handleVoiceCreatedOrCloned} />
+              <VoiceCloneDialog onVoiceCloned={handleVoiceCreatedOrCloned} />
             </div>
           </div>
         </div>
@@ -110,8 +130,10 @@ export default function Home() {
             <VoiceSettingsPanel
               voiceSettings={voiceSettings}
               audioSettings={audioSettings}
+              voiceModify={voiceModify}
               onVoiceChange={setVoiceSettings}
               onAudioChange={setAudioSettings}
+              onVoiceModifyChange={setVoiceModify}
             />
           </div>
 
@@ -119,6 +141,11 @@ export default function Home() {
             <AudioPlayer
               audioResult={currentAudio}
               format={audioSettings.format}
+            />
+            <VoiceLibraryPanel
+              key={voiceLibraryKey}
+              selectedVoiceId={voiceSettings.voiceId}
+              onVoiceSelect={handleVoiceSelect}
             />
             {mounted ? (
               <GenerationHistory
