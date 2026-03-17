@@ -1,13 +1,13 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { toast } from 'sonner';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { RefreshCw, Trash2, Mic, Wand2, Copy, Pencil } from 'lucide-react';
+import { RefreshCw, Trash2, Mic, Wand2, Copy, Pencil, Play, Square, Loader2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import type { VoiceInfo } from '@/lib/types';
@@ -41,6 +41,8 @@ interface VoiceLibraryPanelProps {
   onVoiceSelect: (voiceId: string) => void;
 }
 
+const PREVIEW_TEXT = 'Hello! This is a preview of my voice. I hope you enjoy listening to it.';
+
 export function VoiceLibraryPanel({ selectedVoiceId, onVoiceSelect }: VoiceLibraryPanelProps) {
   const [systemVoices, setSystemVoices] = useState<VoiceInfo[]>([]);
   const [clonedVoices, setClonedVoices] = useState<VoiceInfo[]>([]);
@@ -50,6 +52,10 @@ export function VoiceLibraryPanel({ selectedVoiceId, onVoiceSelect }: VoiceLibra
   const [nicknames, setNicknames] = useState<Record<string, string>>({});
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editValue, setEditValue] = useState('');
+  const [previewCache, setPreviewCache] = useState<Record<string, string>>({});
+  const [previewingId, setPreviewingId] = useState<string | null>(null);
+  const [playingId, setPlayingId] = useState<string | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const saveNickname = useCallback((voiceId: string, name: string) => {
     const trimmed = name.trim();
@@ -128,6 +134,75 @@ export function VoiceLibraryPanel({ selectedVoiceId, onVoiceSelect }: VoiceLibra
       setDeletingId(null);
     }
   };
+
+  const playAudio = useCallback((voiceId: string, url: string) => {
+    const audio = new Audio(url);
+    audioRef.current = audio;
+    setPlayingId(voiceId);
+    audio.play().catch(() => {
+      toast.error('Failed to play audio');
+      setPlayingId(null);
+    });
+    audio.onended = () => {
+      setPlayingId(null);
+    };
+    audio.onerror = () => {
+      setPlayingId(null);
+    };
+  }, []);
+
+  const handlePreview = useCallback(async (voiceId: string) => {
+    if (playingId === voiceId) {
+      audioRef.current?.pause();
+      if (audioRef.current) audioRef.current.currentTime = 0;
+      setPlayingId(null);
+      return;
+    }
+
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+      setPlayingId(null);
+    }
+
+    if (previewCache[voiceId]) {
+      playAudio(voiceId, previewCache[voiceId]);
+      return;
+    }
+
+    setPreviewingId(voiceId);
+    try {
+      const res = await fetch('/api/t2a', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          text: PREVIEW_TEXT,
+          voiceId,
+          speed: 1.0,
+          vol: 1.0,
+          pitch: 0,
+          format: 'mp3',
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        toast.error(data.error ?? 'Preview failed');
+        return;
+      }
+      setPreviewCache(prev => ({ ...prev, [voiceId]: data.audioUrl }));
+      playAudio(voiceId, data.audioUrl);
+    } catch {
+      toast.error('Network error generating preview');
+    } finally {
+      setPreviewingId(null);
+    }
+  }, [playingId, previewCache, playAudio]);
+
+  useEffect(() => {
+    return () => {
+      audioRef.current?.pause();
+    };
+  }, []);
 
   const renderVoiceList = (
     voices: VoiceInfo[],
@@ -231,6 +306,36 @@ export function VoiceLibraryPanel({ selectedVoiceId, onVoiceSelect }: VoiceLibra
                     )}
                   </div>
                   <div className="flex items-center gap-1.5 flex-shrink-0">
+                    <span
+                      role="button"
+                      tabIndex={0}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handlePreview(voice.voice_id);
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          handlePreview(voice.voice_id);
+                        }
+                      }}
+                      className={cn(
+                        'inline-flex items-center justify-center h-6 w-6 rounded-md transition-colors cursor-pointer',
+                        playingId === voice.voice_id
+                          ? 'text-primary bg-primary/10'
+                          : 'text-muted-foreground hover:text-foreground hover:bg-accent'
+                      )}
+                      aria-label={playingId === voice.voice_id ? 'Stop preview' : 'Preview voice'}
+                    >
+                      {previewingId === voice.voice_id ? (
+                        <Loader2 className="h-3 w-3 animate-spin" />
+                      ) : playingId === voice.voice_id ? (
+                        <Square className="h-3 w-3" />
+                      ) : (
+                        <Play className="h-3 w-3" />
+                      )}
+                    </span>
                     {isSelected && (
                       <Badge variant="default" className="text-[10px] px-1.5 py-0">
                         Active
