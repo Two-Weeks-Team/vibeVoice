@@ -155,7 +155,7 @@ export function VoiceCloneDialog({ onVoiceCloned }: VoiceCloneDialogProps) {
   return (
     <Dialog open={open} onOpenChange={(o) => (o ? setOpen(true) : handleClose())}>
       <DialogTrigger
-        render={<Button variant="outline" size="sm" className="gap-1.5" />}
+        render={<Button variant="ghost" size="sm" className="gap-1.5 text-white/80 border border-white/20 hover:bg-white/10 hover:text-white" />}
       >
         <Copy className="h-3.5 w-3.5" />
         Clone Voice
