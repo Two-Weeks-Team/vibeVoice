@@ -80,6 +80,36 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     }
   }
 
+  // Validate optional voiceModify
+  const VALID_SOUND_EFFECTS = ['spacious_echo', 'auditorium_echo', 'lofi_telephone', 'robotic'] as const;
+
+  if (body.voiceModify !== undefined && body.voiceModify !== null) {
+    const vm = body.voiceModify as Record<string, unknown>;
+    if (vm.pitch !== undefined) {
+      const p = Number(vm.pitch);
+      if (isNaN(p) || p < -100 || p > 100) {
+        return NextResponse.json({ error: 'voiceModify.pitch must be between -100 and 100' }, { status: 400 });
+      }
+    }
+    if (vm.intensity !== undefined) {
+      const i = Number(vm.intensity);
+      if (isNaN(i) || i < -100 || i > 100) {
+        return NextResponse.json({ error: 'voiceModify.intensity must be between -100 and 100' }, { status: 400 });
+      }
+    }
+    if (vm.timbre !== undefined) {
+      const t = Number(vm.timbre);
+      if (isNaN(t) || t < -100 || t > 100) {
+        return NextResponse.json({ error: 'voiceModify.timbre must be between -100 and 100' }, { status: 400 });
+      }
+    }
+    if (vm.soundEffect !== undefined && vm.soundEffect !== null) {
+      if (!VALID_SOUND_EFFECTS.includes(vm.soundEffect as typeof VALID_SOUND_EFFECTS[number])) {
+        return NextResponse.json({ error: `Invalid sound effect. Valid: ${VALID_SOUND_EFFECTS.join(', ')}` }, { status: 400 });
+      }
+    }
+  }
+
   const minimaxReq = {
     model: 'speech-2.8-hd',
     text: body.text as string,
@@ -99,6 +129,17 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       bitrate: 128000,
       channel: 1,
     },
+    // Add voice_modify if any non-default values are set
+    ...(body.voiceModify ? {
+      voice_modify: {
+        pitch: Number((body.voiceModify as Record<string, unknown>).pitch ?? 0),
+        intensity: Number((body.voiceModify as Record<string, unknown>).intensity ?? 0),
+        timbre: Number((body.voiceModify as Record<string, unknown>).timbre ?? 0),
+        ...((body.voiceModify as Record<string, unknown>).soundEffect ? {
+          sound_effects: (body.voiceModify as Record<string, unknown>).soundEffect as string,
+        } : {}),
+      },
+    } : {}),
   };
 
   let url = MINIMAX_URL;
