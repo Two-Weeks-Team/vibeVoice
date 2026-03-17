@@ -7,7 +7,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { RefreshCw, Trash2, Mic, Wand2, Copy } from 'lucide-react';
+import { RefreshCw, Trash2, Mic, Wand2, Copy, Pencil } from 'lucide-react';
+import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import type { VoiceInfo } from '@/lib/types';
 
@@ -47,6 +48,24 @@ export function VoiceLibraryPanel({ selectedVoiceId, onVoiceSelect }: VoiceLibra
   const [isLoading, setIsLoading] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [nicknames, setNicknames] = useState<Record<string, string>>({});
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editValue, setEditValue] = useState('');
+
+  const saveNickname = useCallback((voiceId: string, name: string) => {
+    const trimmed = name.trim();
+    try {
+      const raw = localStorage.getItem('vibeVoice:voiceNicknames');
+      const nicks = raw ? JSON.parse(raw) : {};
+      if (trimmed) {
+        nicks[voiceId] = trimmed;
+      } else {
+        delete nicks[voiceId];
+      }
+      localStorage.setItem('vibeVoice:voiceNicknames', JSON.stringify(nicks));
+      setNicknames(nicks);
+    } catch {}
+    setEditingId(null);
+  }, []);
 
   const loadNicknames = useCallback(() => {
     try {
@@ -147,22 +166,68 @@ export function VoiceLibraryPanel({ selectedVoiceId, onVoiceSelect }: VoiceLibra
               >
                 <div className="flex items-center justify-between gap-2">
                   <div className="min-w-0 flex-1">
-                    <p className="truncate font-medium text-sm">
-                      {formatVoiceLabel(voice, nicknames)}
-                    </p>
-                    {voice.description && voice.description.length > 0 && (
-                      <p className="truncate text-xs text-muted-foreground">
-                        {voice.description.join(' · ')}
-                      </p>
-                    )}
-                    {(!voice.description || voice.description.length === 0) && (
-                      <p className="truncate text-xs text-muted-foreground">
-                        {voice.created_time
-                          ? `Created ${voice.created_time}`
-                          : voice.voice_id.length > 20
-                            ? `${voice.voice_id.slice(0, 16)}...`
-                            : voice.voice_id}
-                      </p>
+                    {editingId === voice.voice_id ? (
+                      <Input
+                        autoFocus
+                        value={editValue}
+                        onChange={(e) => setEditValue(e.target.value)}
+                        onKeyDown={(e) => {
+                          e.stopPropagation();
+                          if (e.key === 'Enter') {
+                            saveNickname(voice.voice_id, editValue);
+                          } else if (e.key === 'Escape') {
+                            setEditingId(null);
+                          }
+                        }}
+                        onBlur={() => saveNickname(voice.voice_id, editValue)}
+                        onClick={(e) => e.stopPropagation()}
+                        className="h-7 text-sm px-2"
+                        placeholder="Enter a display name..."
+                      />
+                    ) : (
+                      <>
+                        <div className="flex items-center gap-1">
+                          <p className="truncate font-medium text-sm">
+                            {formatVoiceLabel(voice, nicknames)}
+                          </p>
+                          {voiceType && (
+                            <span
+                              role="button"
+                              tabIndex={0}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setEditingId(voice.voice_id);
+                                setEditValue(nicknames[voice.voice_id] ?? voice.voice_name ?? '');
+                              }}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter' || e.key === ' ') {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  setEditingId(voice.voice_id);
+                                  setEditValue(nicknames[voice.voice_id] ?? voice.voice_name ?? '');
+                                }
+                              }}
+                              className="flex-shrink-0 text-muted-foreground/50 hover:text-muted-foreground transition-opacity cursor-pointer"
+                              aria-label="Rename voice"
+                            >
+                              <Pencil className="h-3 w-3" />
+                            </span>
+                          )}
+                        </div>
+                        {voice.description && voice.description.length > 0 ? (
+                          <p className="truncate text-xs text-muted-foreground">
+                            {voice.description.join(' · ')}
+                          </p>
+                        ) : (
+                          <p className="truncate text-xs text-muted-foreground">
+                            {voice.created_time
+                              ? `Created ${voice.created_time}`
+                              : voice.voice_id.length > 20
+                                ? `${voice.voice_id.slice(0, 16)}...`
+                                : voice.voice_id}
+                          </p>
+                        )}
+                      </>
                     )}
                   </div>
                   <div className="flex items-center gap-1.5 flex-shrink-0">
@@ -172,18 +237,28 @@ export function VoiceLibraryPanel({ selectedVoiceId, onVoiceSelect }: VoiceLibra
                       </Badge>
                     )}
                     {voiceType && (
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-6 w-6 text-muted-foreground hover:text-destructive"
+                      <span
+                        role="button"
+                        tabIndex={0}
                         onClick={(e) => {
                           e.stopPropagation();
                           handleDelete(voice.voice_id, voiceType);
                         }}
-                        disabled={deletingId === voice.voice_id}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            handleDelete(voice.voice_id, voiceType);
+                          }
+                        }}
+                        className={cn(
+                          'flex-shrink-0 inline-flex items-center justify-center h-6 w-6 rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors cursor-pointer',
+                          deletingId === voice.voice_id && 'pointer-events-none opacity-50'
+                        )}
+                        aria-label="Delete voice"
                       >
                         <Trash2 className="h-3 w-3" />
-                      </Button>
+                      </span>
                     )}
                   </div>
                 </div>
