@@ -1405,20 +1405,20 @@ npx next lint                     # Zero lint errors
 
 ## Final Verification Wave (4 parallel agents, ALL must APPROVE)
 
-- [ ] F1. Plan Compliance Audit — oracle
+- [x] F1. Plan Compliance Audit — oracle
   - Verify all 11 tasks completed per plan specifications
   - Check all acceptance criteria met
   - Verify no scope creep (no features from Must NOT Have list)
   - Verify API key not exposed in any client-side code
 
-- [ ] F2. Code Quality Review — unspecified-high
+- [x] F2. Code Quality Review — unspecified-high
   - TypeScript strict mode compliance
   - No `any` types
   - Consistent error handling patterns
   - shadcn component usage follows conventions
   - All `data-testid` attributes present on interactive elements
 
-- [ ] F3. Real Manual QA — unspecified-high + playwright
+- [x] F3. Real Manual QA — unspecified-high + playwright
   - Run `npx next dev`
   - Navigate to http://localhost:3000
   - Generate audio with real MiniMax API
@@ -1428,7 +1428,7 @@ npx next lint                     # Zero lint errors
   - Verify error toast on empty text
   - Take screenshots as evidence
 
-- [ ] F4. Scope Fidelity Check — deep
+- [x] F4. Scope Fidelity Check — deep
   - Verify NONE of the "Must NOT Have" features were implemented
   - Verify `neutral` emotion doesn't exist anywhere in code
   - Verify `vol` minimum is 0.1 everywhere
