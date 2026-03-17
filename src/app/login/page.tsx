@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Loader2 } from 'lucide-react';
 
 export default function LoginPage() {
@@ -42,16 +41,16 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <Card className="w-full max-w-xs">
-        <CardHeader className="text-center">
-          <CardTitle className="text-xl font-semibold tracking-tight">VibeVoice</CardTitle>
-          <CardDescription className="text-sm text-muted-foreground">Enter the team password to continue</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
+    <div className="flex min-h-screen items-center justify-center bg-[#1c1917] px-4">
+      <div className="w-full max-w-sm">
+        <div className="mb-8 text-center">
+          <h1 className="text-2xl font-semibold tracking-tight text-white">VibeVoice</h1>
+          <p className="mt-2 text-sm text-white/50">Enter the team password to continue</p>
+        </div>
+        <div className="rounded-2xl bg-white p-8 shadow-2xl">
+          <form onSubmit={handleSubmit} className="space-y-5">
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password" className="text-[13px] font-medium text-[#1c1917]">Password</Label>
               <Input
                 id="password"
                 type="password"
@@ -60,12 +59,13 @@ export default function LoginPage() {
                 placeholder="Enter password"
                 autoFocus
                 disabled={isLoading}
+                className="h-11 text-[14px]"
               />
               {error && (
-                <p className="text-sm text-destructive">{error}</p>
+                <p className="text-[13px] text-destructive">{error}</p>
               )}
             </div>
-            <Button type="submit" className="w-full" disabled={isLoading || !password}>
+            <Button type="submit" className="w-full h-11 text-[13px] font-medium shadow-sm" disabled={isLoading || !password}>
               {isLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -76,8 +76,8 @@ export default function LoginPage() {
               )}
             </Button>
           </form>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 }

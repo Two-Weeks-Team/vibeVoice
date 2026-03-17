@@ -103,43 +103,43 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b backdrop-blur-sm bg-background/80 sticky top-0 z-50">
-        <div className="mx-auto max-w-7xl px-4 py-3 sm:px-6 lg:px-8">
+      <header className="bg-[#1c1917] text-white sticky top-0 z-50">
+        <div className="mx-auto max-w-6xl px-6 py-3">
           <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-lg font-semibold tracking-tight">VibeVoice</h1>
-              <p className="text-xs text-muted-foreground">
-                Text-to-Audio powered by MiniMax
-              </p>
+            <div className="flex items-center gap-3">
+              <h1 className="text-base font-semibold tracking-tight">VibeVoice</h1>
+              <span className="hidden sm:inline text-xs text-white/50">Text-to-Audio</span>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5">
               <VoiceDesignDialog onVoiceCreated={handleVoiceCreatedOrCloned} />
               <VoiceCloneDialog onVoiceCloned={handleVoiceCreatedOrCloned} />
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8 text-muted-foreground"
+              <button
                 onClick={async () => {
                   await fetch('/api/auth/logout', { method: 'POST' });
                   window.location.href = '/login';
                 }}
+                className="ml-1 p-2 rounded-md text-white/40 hover:text-white/80 transition-colors"
                 aria-label="Sign out"
               >
                 <LogOut className="h-4 w-4" />
-              </Button>
+              </button>
             </div>
           </div>
         </div>
       </header>
 
-      <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
-          <div className="space-y-4">
+      <main className="mx-auto max-w-6xl px-6 py-8">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_400px]">
+          <div className="space-y-5">
             <TextInputPanel
               text={text}
               onChange={setText}
               onGenerate={handleGenerate}
               isLoading={isLoading}
+            />
+            <AudioPlayer
+              audioResult={currentAudio}
+              format={audioSettings.format}
             />
             <VoiceSettingsPanel
               voiceSettings={voiceSettings}
@@ -151,11 +151,7 @@ export default function Home() {
             />
           </div>
 
-          <div className="space-y-4">
-            <AudioPlayer
-              audioResult={currentAudio}
-              format={audioSettings.format}
-            />
+          <div className="space-y-5">
             <VoiceLibraryPanel
               key={voiceLibraryKey}
               selectedVoiceId={voiceSettings.voiceId}
@@ -169,7 +165,7 @@ export default function Home() {
                 isExpired={isExpired}
               />
             ) : (
-              <div className="h-32 animate-pulse rounded-lg bg-muted" />
+              <div className="h-32 animate-pulse rounded-xl bg-card" />
             )}
           </div>
         </div>

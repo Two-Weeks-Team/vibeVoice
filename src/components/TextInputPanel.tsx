@@ -32,7 +32,7 @@ export function TextInputPanel({ text, onChange, onGenerate, isLoading }: TextIn
           value={text}
           onChange={(e) => onChange(e.target.value)}
           placeholder="Enter your text here… Supports pause markers like <#1.5#> and interjection tags like (laughs), (sighs)"
-          className="min-h-[200px] resize-y font-mono text-sm"
+          className="min-h-[180px] resize-y text-[14px] leading-relaxed bg-background border-border/60 focus-visible:ring-primary/30"
           rows={8}
         />
         <div className="flex justify-end">
@@ -53,8 +53,8 @@ export function TextInputPanel({ text, onChange, onGenerate, isLoading }: TextIn
         data-testid="generate-btn"
         onClick={onGenerate}
         disabled={!canGenerate}
-        className="w-full"
-        size="default"
+        className="w-full text-[13px] font-medium shadow-sm"
+        size="lg"
       >
         {isLoading ? (
           <>
