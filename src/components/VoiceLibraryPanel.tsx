@@ -127,11 +127,19 @@ export function VoiceLibraryPanel({ selectedVoiceId, onVoiceSelect }: VoiceLibra
           {voices.map((voice) => {
             const isSelected = voice.voice_id === selectedVoiceId;
             return (
-              <button
+              <div
                 key={voice.voice_id}
+                role="button"
+                tabIndex={0}
                 onClick={() => onVoiceSelect(voice.voice_id)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    onVoiceSelect(voice.voice_id);
+                  }
+                }}
                 className={cn(
-                  'w-full rounded-md border px-3 py-2 text-left text-sm transition-colors',
+                  'w-full rounded-md border px-3 py-2 text-left text-sm transition-colors cursor-pointer',
                   isSelected
                     ? 'border-primary bg-primary/5 text-primary'
                     : 'hover:bg-accent'
@@ -179,7 +187,7 @@ export function VoiceLibraryPanel({ selectedVoiceId, onVoiceSelect }: VoiceLibra
                     )}
                   </div>
                 </div>
-              </button>
+              </div>
             );
           })}
         </div>
