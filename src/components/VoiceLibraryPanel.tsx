@@ -235,7 +235,7 @@ export function VoiceLibraryPanel({ selectedVoiceId, onVoiceSelect }: VoiceLibra
                 className={cn(
                   'w-full rounded-md border px-2.5 py-1.5 text-left text-sm transition-colors cursor-pointer',
                   isSelected
-                    ? 'border-primary bg-primary/5 text-primary'
+                    ? 'border-blue-500 bg-blue-50 text-blue-700 ring-1 ring-blue-200'
                     : 'hover:bg-accent'
                 )}
               >

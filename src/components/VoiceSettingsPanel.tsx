@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
@@ -11,6 +12,8 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
+import { ChevronDown } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import { EMOTIONS, AUDIO_FORMATS, EMOTION_LABELS, SOUND_EFFECTS, SOUND_EFFECT_LABELS } from '@/lib/constants';
 import type { VoiceSettings, AudioSettings, Emotion, AudioFormat, VoiceModify, SoundEffect } from '@/lib/types';
 
@@ -51,6 +54,9 @@ export function VoiceSettingsPanel({
   onAudioChange,
   onVoiceModifyChange,
 }: VoiceSettingsPanelProps) {
+  const [effectsOpen, setEffectsOpen] = useState(false);
+  const hasActiveEffects = voiceModify.pitch !== 0 || voiceModify.intensity !== 0 || voiceModify.timbre !== 0 || !!voiceModify.soundEffect;
+
   return (
     <Card>
       <CardHeader className="pb-2">
@@ -179,9 +185,23 @@ export function VoiceSettingsPanel({
 
         <Separator />
 
-        {/* Voice Effects */}
-        <div className="space-y-4">
-          <Label className="text-[13px] font-medium text-foreground">Voice Effects</Label>
+        <div>
+          <button
+            type="button"
+            onClick={() => setEffectsOpen(!effectsOpen)}
+            className="flex w-full items-center justify-between py-1"
+          >
+            <span className="text-[13px] font-medium text-foreground flex items-center gap-2">
+              Voice Effects
+              {hasActiveEffects && (
+                <span className="inline-block h-1.5 w-1.5 rounded-full bg-primary" />
+              )}
+            </span>
+            <ChevronDown className={cn('h-4 w-4 text-muted-foreground transition-transform', effectsOpen && 'rotate-180')} />
+          </button>
+        </div>
+
+        <div className={cn('space-y-4 overflow-hidden transition-all', effectsOpen ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0')}>
 
           {/* Effect Pitch: Deepen/Brighten */}
           <div className="space-y-2">

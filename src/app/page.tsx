@@ -110,7 +110,7 @@ export default function Home() {
               <h1 className="text-base font-semibold tracking-tight">VibeVoice</h1>
               <span className="hidden sm:inline text-xs text-white/50">Text-to-Audio</span>
             </div>
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-1.5 [&_button[data-slot=button]]:border-white/20 [&_button[data-slot=button]]:text-white/80 [&_button[data-slot=button]]:hover:bg-white/10 [&_button[data-slot=button]]:hover:text-white">
               <VoiceDesignDialog onVoiceCreated={handleVoiceCreatedOrCloned} />
               <VoiceCloneDialog onVoiceCloned={handleVoiceCreatedOrCloned} />
               <button

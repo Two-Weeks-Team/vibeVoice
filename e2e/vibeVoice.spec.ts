@@ -11,7 +11,22 @@ const MOCK_SUCCESS_RESPONSE = {
 
 test.describe('VibeVoice Dashboard', () => {
   test.beforeEach(async ({ page }) => {
-    // Clear localStorage before each test to isolate state
+    await page.goto('/login');
+    const res = await page.request.post('/api/auth/login', {
+      data: { password: process.env.AUTH_PASSWORD ?? '1234' },
+    });
+    const cookies = res.headers()['set-cookie'];
+    if (cookies) {
+      const match = cookies.match(/vv-session=([^;]+)/);
+      if (match) {
+        await page.context().addCookies([{
+          name: 'vv-session',
+          value: match[1],
+          domain: 'localhost',
+          path: '/',
+        }]);
+      }
+    }
     await page.goto('/');
     await page.evaluate(() => localStorage.clear());
   });
