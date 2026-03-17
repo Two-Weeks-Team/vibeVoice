@@ -10,8 +10,10 @@ import { VoiceLibraryPanel } from '@/components/VoiceLibraryPanel';
 import { VoiceDesignDialog } from '@/components/VoiceDesignDialog';
 import { VoiceCloneDialog } from '@/components/VoiceCloneDialog';
 import { useHistory } from '@/hooks/useHistory';
+import { Button } from '@/components/ui/button';
 import { DEFAULT_VOICE_SETTINGS, DEFAULT_AUDIO_SETTINGS, DEFAULT_VOICE_MODIFY } from '@/lib/constants';
 import type { VoiceSettings, AudioSettings, VoiceModify, GenerationResult, HistoryEntry } from '@/lib/types';
+import { LogOut } from 'lucide-react';
 
 export default function Home() {
   const [text, setText] = useState('');
@@ -113,6 +115,18 @@ export default function Home() {
             <div className="flex items-center gap-2">
               <VoiceDesignDialog onVoiceCreated={handleVoiceCreatedOrCloned} />
               <VoiceCloneDialog onVoiceCloned={handleVoiceCreatedOrCloned} />
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 text-muted-foreground"
+                onClick={async () => {
+                  await fetch('/api/auth/logout', { method: 'POST' });
+                  window.location.href = '/login';
+                }}
+                aria-label="Sign out"
+              >
+                <LogOut className="h-4 w-4" />
+              </Button>
             </div>
           </div>
         </div>
