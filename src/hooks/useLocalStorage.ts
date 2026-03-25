@@ -10,13 +10,21 @@ export function useLocalStorage<T>(key: string, defaultValue: T) {
     if (mountedRef.current) return;
     mountedRef.current = true;
     let parsed: T | undefined;
+    let stored: string | null = null;
     try {
-      const stored = localStorage.getItem(key);
+      stored = localStorage.getItem(key);
       if (stored !== null) {
         parsed = JSON.parse(stored) as T;
       }
     } catch {
-      console.warn(`[useLocalStorage] Failed to parse key "${key}", clearing.`);
+      console.warn(`[useLocalStorage] Failed to parse key "${key}". Preserving backup and resetting active value.`);
+      try {
+        if (stored !== null) {
+          localStorage.setItem(`${key}:corrupt`, stored);
+        }
+      } catch {
+        console.warn(`[useLocalStorage] Failed to preserve backup for key "${key}"`);
+      }
       localStorage.removeItem(key);
     }
     const finalValue = parsed !== undefined ? parsed : defaultValue;

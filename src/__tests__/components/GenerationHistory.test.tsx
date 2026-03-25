@@ -67,6 +67,26 @@ describe('GenerationHistory', () => {
     expect(screen.getByText(/Hello world/)).toBeInTheDocument();
   });
 
+  it('shows language boost in the settings summary when selected', () => {
+    const koreanEntry = makeEntry({
+      voiceSettings: {
+        ...recentEntry.voiceSettings,
+        languageBoost: 'Korean',
+      },
+    });
+
+    render(
+      <GenerationHistory
+        history={[koreanEntry]}
+        onSelect={vi.fn()}
+        onClear={vi.fn()}
+        isExpired={() => false}
+      />
+    );
+
+    expect(screen.getByText(/Korean/)).toBeInTheDocument();
+  });
+
   it('shows expired badge with data-testid="expired-badge" for expired items', () => {
     render(
       <GenerationHistory
@@ -119,6 +139,24 @@ describe('GenerationHistory', () => {
     expect(onSelect).toHaveBeenCalledWith(recentEntry);
   });
 
+  it('calls onDelete for a single history item without selecting it', () => {
+    const onSelect = vi.fn();
+    const onDelete = vi.fn();
+    render(
+      <GenerationHistory
+        history={[recentEntry]}
+        onSelect={onSelect}
+        onDelete={onDelete}
+        onClear={vi.fn()}
+        isExpired={() => false}
+      />
+    );
+
+    fireEvent.click(screen.getByTestId(`delete-history-item-${recentEntry.id}`));
+    expect(onDelete).toHaveBeenCalledWith(recentEntry.id);
+    expect(onSelect).not.toHaveBeenCalled();
+  });
+
   it('does not call onSelect when expired item is clicked', () => {
     const onSelect = vi.fn();
     render(
@@ -143,5 +181,22 @@ describe('GenerationHistory', () => {
       />
     );
     expect(screen.getByTestId('clear-history-btn')).toBeInTheDocument();
+  });
+
+  it('shows recover backup button when empty and backup exists', () => {
+    const onRecoverBackup = vi.fn();
+    render(
+      <GenerationHistory
+        history={[]}
+        onSelect={vi.fn()}
+        onClear={vi.fn()}
+        isExpired={() => false}
+        hasCorruptBackup
+        onRecoverBackup={onRecoverBackup}
+      />
+    );
+
+    fireEvent.click(screen.getByTestId('recover-history-btn'));
+    expect(onRecoverBackup).toHaveBeenCalledOnce();
   });
 });

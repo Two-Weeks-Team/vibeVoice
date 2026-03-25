@@ -41,13 +41,13 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#1c1917] px-4">
+    <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="w-full max-w-sm">
         <div className="mb-8 text-center">
-          <h1 className="text-2xl font-semibold tracking-tight text-white">VibeVoice</h1>
-          <p className="mt-2 text-sm text-white/60">Enter the team password to continue</p>
+          <h1 className="text-2xl font-semibold tracking-tight text-foreground">VibeVoice</h1>
+          <p className="mt-2 text-sm text-muted-foreground">Enter the team password to continue</p>
         </div>
-        <div className="rounded-xl bg-white p-8 shadow-xl">
+        <div className="rounded-2xl border border-border bg-card p-8 shadow-none">
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="space-y-2">
               <Label htmlFor="password" className="text-[13px] font-medium text-[#1c1917]">Password</Label>
@@ -65,7 +65,7 @@ export default function LoginPage() {
                 <p className="text-[13px] text-destructive">{error}</p>
               )}
             </div>
-            <Button type="submit" className="w-full h-11 text-[13px] font-medium shadow-sm bg-blue-600 hover:bg-blue-700 text-white" disabled={isLoading || !password}>
+            <Button type="submit" className="w-full h-11 text-[13px] font-medium shadow-none" disabled={isLoading || !password}>
               {isLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />

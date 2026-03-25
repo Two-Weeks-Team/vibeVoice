@@ -39,11 +39,12 @@ function formatVoiceLabel(voice: VoiceInfo, nicknames: Record<string, string>): 
 interface VoiceLibraryPanelProps {
   selectedVoiceId: string;
   onVoiceSelect: (voiceId: string) => void;
+  embedded?: boolean;
 }
 
 const PREVIEW_TEXT = 'Hello! This is a preview of my voice. I hope you enjoy listening to it.';
 
-export function VoiceLibraryPanel({ selectedVoiceId, onVoiceSelect }: VoiceLibraryPanelProps) {
+export function VoiceLibraryPanel({ selectedVoiceId, onVoiceSelect, embedded = false }: VoiceLibraryPanelProps) {
   const [systemVoices, setSystemVoices] = useState<VoiceInfo[]>([]);
   const [clonedVoices, setClonedVoices] = useState<VoiceInfo[]>([]);
   const [designedVoices, setDesignedVoices] = useState<VoiceInfo[]>([]);
@@ -55,7 +56,30 @@ export function VoiceLibraryPanel({ selectedVoiceId, onVoiceSelect }: VoiceLibra
   const [previewCache, setPreviewCache] = useState<Record<string, string>>({});
   const [previewingId, setPreviewingId] = useState<string | null>(null);
   const [playingId, setPlayingId] = useState<string | null>(null);
+  const [query, setQuery] = useState('');
   const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  const filterVoices = useCallback(
+    (voices: VoiceInfo[]) => {
+      const keyword = query.trim().toLowerCase();
+      if (!keyword) return voices;
+
+      return voices.filter((voice) => {
+        const haystack = [
+          voice.voice_id,
+          voice.voice_name,
+          ...(voice.description ?? []),
+          nicknames[voice.voice_id],
+        ]
+          .filter(Boolean)
+          .join(' ')
+          .toLowerCase();
+
+        return haystack.includes(keyword);
+      });
+    },
+    [nicknames, query],
+  );
 
   const saveNickname = useCallback((voiceId: string, name: string) => {
     const trimmed = name.trim();
@@ -216,8 +240,8 @@ export function VoiceLibraryPanel({ selectedVoiceId, onVoiceSelect }: VoiceLibra
       );
     }
     return (
-      <ScrollArea className="h-[250px]">
-        <div className="space-y-1.5 pr-3">
+      <ScrollArea className={cn(embedded ? 'h-[56vh] min-h-[360px]' : 'h-[250px]')}>
+        <div className="space-y-2 pr-2 pb-4">
           {voices.map((voice) => {
             const isSelected = voice.voice_id === selectedVoiceId;
             return (
@@ -233,9 +257,9 @@ export function VoiceLibraryPanel({ selectedVoiceId, onVoiceSelect }: VoiceLibra
                   }
                 }}
                 className={cn(
-                  'w-full rounded-md border px-2.5 py-1.5 text-left text-sm transition-colors cursor-pointer',
+                  'w-full overflow-hidden rounded-[20px] border px-3 py-2 text-left text-sm transition-colors cursor-pointer',
                   isSelected
-                    ? 'border-blue-500 bg-blue-50 text-blue-700 ring-1 ring-blue-200'
+                    ? 'border-foreground/12 bg-muted text-foreground ring-1 ring-foreground/8'
                     : 'hover:bg-accent'
                 )}
               >
@@ -262,7 +286,7 @@ export function VoiceLibraryPanel({ selectedVoiceId, onVoiceSelect }: VoiceLibra
                     ) : (
                       <>
                         <div className="flex items-center gap-1">
-                          <p className="truncate font-medium text-[13px]">
+                          <p className="truncate font-medium text-[13px] text-foreground">
                             {formatVoiceLabel(voice, nicknames)}
                           </p>
                           {voiceType && (
@@ -282,7 +306,7 @@ export function VoiceLibraryPanel({ selectedVoiceId, onVoiceSelect }: VoiceLibra
                                   setEditValue(nicknames[voice.voice_id] ?? voice.voice_name ?? '');
                                 }
                               }}
-                              className="flex-shrink-0 text-muted-foreground/50 hover:text-muted-foreground transition-opacity cursor-pointer"
+                              className="flex-shrink-0 text-muted-foreground/50 hover:text-foreground transition-opacity cursor-pointer"
                               aria-label="Rename voice"
                             >
                               <Pencil className="h-3 w-3" />
@@ -323,7 +347,7 @@ export function VoiceLibraryPanel({ selectedVoiceId, onVoiceSelect }: VoiceLibra
                       className={cn(
                         'inline-flex items-center justify-center h-6 w-6 rounded-md transition-colors cursor-pointer',
                         playingId === voice.voice_id
-                          ? 'text-primary bg-primary/10'
+                          ? 'text-foreground bg-muted'
                           : 'text-muted-foreground hover:text-foreground hover:bg-accent'
                       )}
                       aria-label={playingId === voice.voice_id ? 'Stop preview' : 'Preview voice'}
@@ -375,49 +399,77 @@ export function VoiceLibraryPanel({ selectedVoiceId, onVoiceSelect }: VoiceLibra
     );
   };
 
-  return (
-    <Card>
-      <CardHeader className="pb-2">
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-sm font-semibold tracking-tight">Voice Library</CardTitle>
+  const content = (
+    <>
+      {!embedded && (
+        <CardHeader className="pb-2">
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-sm font-semibold tracking-tight">Voice Library</CardTitle>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7"
+              onClick={fetchVoices}
+              disabled={isLoading}
+            >
+              <RefreshCw className={cn('h-3.5 w-3.5', isLoading && 'animate-spin')} />
+            </Button>
+          </div>
+        </CardHeader>
+      )}
+      <CardContent className={cn(embedded && 'px-0 pb-0 pt-0')}>
+        <div className="mb-3 flex items-center justify-between">
+          <p className="text-[12px] font-medium text-muted-foreground">Browse, preview, and switch voices</p>
           <Button
             variant="ghost"
             size="icon"
-            className="h-7 w-7"
+            className="h-8 w-8"
             onClick={fetchVoices}
             disabled={isLoading}
           >
-            <RefreshCw className={cn('h-3.5 w-3.5', isLoading && 'animate-spin')} />
+            <RefreshCw className={cn('h-4 w-4', isLoading && 'animate-spin')} />
           </Button>
         </div>
-      </CardHeader>
-      <CardContent>
+        <div className="mb-3">
+          <Input
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder="Search voices by name, id, or description"
+            className="h-10 rounded-xl"
+          />
+        </div>
         <Tabs defaultValue="system">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="system" className="text-xs">
+          <TabsList className="grid w-full grid-cols-3 gap-1 rounded-xl bg-muted/70 p-1">
+            <TabsTrigger value="system" className="min-w-0 truncate text-xs">
               <Mic className="mr-1 h-3 w-3" />
               System ({systemVoices.length})
             </TabsTrigger>
-            <TabsTrigger value="cloned" className="text-xs">
+            <TabsTrigger value="cloned" className="min-w-0 truncate text-xs">
               <Copy className="mr-1 h-3 w-3" />
               Cloned ({clonedVoices.length})
             </TabsTrigger>
-            <TabsTrigger value="designed" className="text-xs">
+            <TabsTrigger value="designed" className="min-w-0 truncate text-xs">
               <Wand2 className="mr-1 h-3 w-3" />
               Designed ({designedVoices.length})
             </TabsTrigger>
           </TabsList>
           <TabsContent value="system" className="mt-3">
-            {renderVoiceList(systemVoices)}
+            {renderVoiceList(filterVoices(systemVoices))}
           </TabsContent>
           <TabsContent value="cloned" className="mt-3">
-            {renderVoiceList(clonedVoices, 'voice_cloning')}
+            {renderVoiceList(filterVoices(clonedVoices), 'voice_cloning')}
           </TabsContent>
           <TabsContent value="designed" className="mt-3">
-            {renderVoiceList(designedVoices, 'voice_generation')}
+            {renderVoiceList(filterVoices(designedVoices), 'voice_generation')}
           </TabsContent>
         </Tabs>
       </CardContent>
-    </Card>
+    </>
   );
+
+  if (embedded) {
+    return <div className="space-y-0">{content}</div>;
+  }
+
+  return <Card>{content}</Card>;
 }

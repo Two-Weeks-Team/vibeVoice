@@ -1,5 +1,47 @@
 export type Emotion = 'happy' | 'sad' | 'angry' | 'fearful' | 'disgusted' | 'surprised' | 'calm' | 'fluent' | 'whisper';
 export type AudioFormat = 'mp3' | 'wav' | 'flac';
+export type LanguageBoost =
+  | 'Chinese'
+  | 'Chinese,Yue'
+  | 'English'
+  | 'Arabic'
+  | 'Russian'
+  | 'Spanish'
+  | 'French'
+  | 'Portuguese'
+  | 'German'
+  | 'Turkish'
+  | 'Dutch'
+  | 'Ukrainian'
+  | 'Vietnamese'
+  | 'Indonesian'
+  | 'Japanese'
+  | 'Italian'
+  | 'Korean'
+  | 'Thai'
+  | 'Polish'
+  | 'Romanian'
+  | 'Greek'
+  | 'Czech'
+  | 'Finnish'
+  | 'Hindi'
+  | 'Bulgarian'
+  | 'Danish'
+  | 'Hebrew'
+  | 'Malay'
+  | 'Persian'
+  | 'Slovak'
+  | 'Swedish'
+  | 'Croatian'
+  | 'Filipino'
+  | 'Hungarian'
+  | 'Norwegian'
+  | 'Slovenian'
+  | 'Catalan'
+  | 'Nynorsk'
+  | 'Tamil'
+  | 'Afrikaans'
+  | 'auto';
 
 export interface VoiceSettings {
   voiceId: string;
@@ -7,6 +49,7 @@ export interface VoiceSettings {
   vol: number;        // (0, 10] — MINIMUM 0.1, never 0
   pitch: number;      // [-12, 12] integer
   emotion?: Emotion;  // optional — undefined = MiniMax auto-select
+  languageBoost?: LanguageBoost;
 }
 
 export interface AudioSettings {
@@ -21,6 +64,8 @@ export interface GenerateRequest {
   pitch?: number;
   emotion?: Emotion;
   format?: AudioFormat;
+  languageBoost?: LanguageBoost;
+  voiceModify?: VoiceModify;
 }
 
 export interface GenerateResponse {

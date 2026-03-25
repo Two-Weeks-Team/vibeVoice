@@ -1,5 +1,5 @@
 import { renderHook, act } from '@testing-library/react';
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { useHistory } from '@/hooks/useHistory';
 import type { HistoryEntry } from '@/lib/types';
 
@@ -62,6 +62,21 @@ describe('useHistory', () => {
     expect(result.current.history).toHaveLength(0);
   });
 
+  it('removeItem deletes only the target history entry', async () => {
+    const { result } = renderHook(() => useHistory());
+    await act(async () => {
+      result.current.addItem(makeEntry({ id: 'first' }));
+      result.current.addItem(makeEntry({ id: 'second' }));
+    });
+
+    await act(async () => {
+      result.current.removeItem('second');
+    });
+
+    expect(result.current.history).toHaveLength(1);
+    expect(result.current.history[0].id).toBe('first');
+  });
+
   it('isExpired returns false for recent items', () => {
     const { result } = renderHook(() => useHistory());
     const recent = makeEntry({ generatedAt: Date.now() });
@@ -74,5 +89,19 @@ describe('useHistory', () => {
       generatedAt: Date.now() - (23 * 60 * 60 * 1000 + 1000), // 23h + 1s ago
     });
     expect(result.current.isExpired(old)).toBe(true);
+  });
+
+  it('recovers history from corrupt backup key', async () => {
+    localStorage.setItem('vibeVoice:history:corrupt', JSON.stringify([makeEntry({ id: 'backup-1' })]));
+    const { result } = renderHook(() => useHistory());
+
+    await act(async () => {
+      const recovered = result.current.recoverFromCorruptBackup();
+      expect(recovered).toBe(true);
+    });
+
+    expect(result.current.history).toHaveLength(1);
+    expect(result.current.history[0].id).toBe('backup-1');
+    expect(localStorage.getItem('vibeVoice:history:corrupt')).toBeNull();
   });
 });

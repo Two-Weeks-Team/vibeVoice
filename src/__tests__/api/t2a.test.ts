@@ -93,6 +93,12 @@ describe('POST /api/t2a', () => {
     expect(body.error).toContain('format');
   });
 
+  it('returns 400 when languageBoost is invalid', async () => {
+    const { status, body } = await getBody(createRequest({ text: 'hi', languageBoost: 'Klingon' }));
+    expect(status).toBe(400);
+    expect(body.error).toContain('languageBoost');
+  });
+
   it('returns 500 when MINIMAX_API_KEY is missing', async () => {
     vi.unstubAllEnvs();
     // No API key set
@@ -190,5 +196,26 @@ describe('POST /api/t2a', () => {
     expect(body.traceId).toBe('trace-123');
     expect(body.durationMs).toBe(5000);
     expect(body.usageCharacters).toBe(10);
+  });
+
+  it('passes language_boost through to MiniMax when provided', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve({
+        base_resp: { status_code: 0, status_msg: 'success' },
+        data: { audio: 'https://cdn.minimax.io/audio/test.mp3', status: 2 },
+        trace_id: 'trace-123',
+        extra_info: { audio_length: 5000, usage_characters: 10 },
+      }),
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    const { status } = await getBody(createRequest({ text: 'hello world', languageBoost: 'Korean' }));
+
+    expect(status).toBe(200);
+    expect(fetchMock).toHaveBeenCalledOnce();
+    const requestInit = fetchMock.mock.calls[0]?.[1] as RequestInit;
+    const payload = JSON.parse(String(requestInit.body)) as { language_boost?: string };
+    expect(payload.language_boost).toBe('Korean');
   });
 });

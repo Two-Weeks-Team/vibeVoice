@@ -39,6 +39,7 @@ describe('useLocalStorage', () => {
     });
     expect(result.current.value).toBe('default');
     expect(localStorage.getItem('test-key')).toBeNull();
+    expect(localStorage.getItem('test-key:corrupt')).toBe('NOT_VALID_JSON{{{');
     consoleSpy.mockRestore();
   });
 

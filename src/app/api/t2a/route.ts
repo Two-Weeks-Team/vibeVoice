@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { LANGUAGE_BOOST_OPTIONS } from '@/lib/constants';
 
 export const maxDuration = 30;
 
@@ -80,6 +81,14 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     }
   }
 
+  if (body.languageBoost !== undefined) {
+    if (!LANGUAGE_BOOST_OPTIONS.includes(body.languageBoost as typeof LANGUAGE_BOOST_OPTIONS[number])) {
+      return NextResponse.json({
+        error: `Invalid languageBoost. Valid values: ${LANGUAGE_BOOST_OPTIONS.join(', ')}`,
+      }, { status: 400 });
+    }
+  }
+
   // Validate optional voiceModify
   const VALID_SOUND_EFFECTS = ['spacious_echo', 'auditorium_echo', 'lofi_telephone', 'robotic'] as const;
 
@@ -115,7 +124,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     text: body.text as string,
     stream: false,
     output_format: 'url',
-    language_boost: 'auto',
+    language_boost: (body.languageBoost as string) ?? 'auto',
     voice_setting: {
       voice_id: (body.voiceId as string) ?? VOICE_ID,
       speed: body.speed !== undefined ? Number(body.speed) : 1.0,

@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 import { TextInputPanel } from '@/components/TextInputPanel';
@@ -79,5 +80,64 @@ describe('TextInputPanel', () => {
     render(<TextInputPanel {...defaultProps} text="hello" isLoading={true} />);
     const btn = screen.getByTestId('generate-btn');
     expect(btn.querySelector('svg')).toBeInTheDocument();
+  });
+
+  it('renders interjection picker buttons', () => {
+    render(<TextInputPanel {...defaultProps} />);
+    expect(screen.getByTestId('interjection-picker')).toBeInTheDocument();
+    expect(screen.getByTestId('interjection-btn-sighs')).toBeInTheDocument();
+    expect(screen.getByTestId('interjection-btn-gasps')).toBeInTheDocument();
+  });
+
+  it('inserts an interjection tag at the cursor position', () => {
+    function ControlledPanel() {
+      const [text, setText] = useState('Hello world');
+
+      return (
+        <TextInputPanel
+          text={text}
+          onChange={setText}
+          onGenerate={vi.fn()}
+          isLoading={false}
+        />
+      );
+    }
+
+    render(<ControlledPanel />);
+
+    const textarea = screen.getByTestId('text-input') as HTMLTextAreaElement;
+    textarea.focus();
+    textarea.setSelectionRange(5, 5);
+
+    fireEvent.click(screen.getByTestId('interjection-btn-sighs'));
+
+    expect(textarea.value).toBe('Hello (sighs) world');
+  });
+
+  it('replaces selected text with the chosen interjection tag', () => {
+    function ControlledPanel() {
+      const [text, setText] = useState('Hello placeholder world');
+
+      return (
+        <TextInputPanel
+          text={text}
+          onChange={setText}
+          onGenerate={vi.fn()}
+          isLoading={false}
+        />
+      );
+    }
+
+    render(<ControlledPanel />);
+
+    const textarea = screen.getByTestId('text-input') as HTMLTextAreaElement;
+    const start = textarea.value.indexOf('placeholder');
+    const end = start + 'placeholder'.length;
+    textarea.focus();
+    textarea.setSelectionRange(start, end);
+
+    fireEvent.click(screen.getByTestId('interjection-btn-gasps'));
+
+    expect(textarea.value).toBe('Hello (gasps) world');
   });
 });

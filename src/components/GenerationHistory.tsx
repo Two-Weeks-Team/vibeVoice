@@ -37,21 +37,31 @@ function formatSettingsSummary(entry: HistoryEntry): string {
     parts.push(entry.voiceSettings.emotion.charAt(0).toUpperCase() + entry.voiceSettings.emotion.slice(1));
   }
 
+  if (entry.voiceSettings.languageBoost && entry.voiceSettings.languageBoost !== 'auto') {
+    parts.push(entry.voiceSettings.languageBoost.replace(',', ' / '));
+  }
+
   return parts.join(' · ');
 }
 
 interface GenerationHistoryProps {
   history: HistoryEntry[];
   onSelect: (entry: HistoryEntry) => void;
+  onDelete?: (id: string) => void;
   onClear: () => void;
   isExpired: (entry: HistoryEntry) => boolean;
+  hasCorruptBackup?: boolean;
+  onRecoverBackup?: () => void;
 }
 
 export function GenerationHistory({
   history,
   onSelect,
+  onDelete,
   onClear,
   isExpired,
+  hasCorruptBackup = false,
+  onRecoverBackup,
 }: GenerationHistoryProps) {
   const [playingId, setPlayingId] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -83,11 +93,20 @@ export function GenerationHistory({
     audio.onerror = () => setPlayingId(null);
   };
 
+  const handleDelete = (id: string) => {
+    if (playingId === id) {
+      audioRef.current?.pause();
+      if (audioRef.current) audioRef.current.currentTime = 0;
+      setPlayingId(null);
+    }
+    onDelete?.(id);
+  };
+
   return (
     <Card>
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-sm font-semibold tracking-tight">
+          <CardTitle className="text-[15px] font-semibold tracking-tight">
             History
             {history.length > 0 && (
               <span className="ml-2 text-xs font-normal text-muted-foreground">
@@ -113,16 +132,27 @@ export function GenerationHistory({
         {history.length === 0 ? (
           <div
             data-testid="history-empty"
-            className="flex flex-col items-center justify-center py-8 text-center"
+            className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border bg-muted/15 py-10 text-center"
           >
-            <Clock className="mb-2 h-8 w-8 text-muted-foreground/50" />
+            <Clock className="mb-2 h-7 w-7 text-muted-foreground/50" />
             <p className="text-sm text-muted-foreground">No generations yet</p>
             <p className="text-xs text-muted-foreground/70">
-              Your audio history will appear here
+              Recent outputs will appear here
             </p>
+            {hasCorruptBackup && onRecoverBackup && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={onRecoverBackup}
+                data-testid="recover-history-btn"
+                className="mt-3 h-8 text-xs"
+              >
+                Recover local backup
+              </Button>
+            )}
           </div>
         ) : (
-          <ScrollArea className="h-[300px]">
+          <ScrollArea className="h-[320px]">
             <div className="space-y-2 pr-3">
               {history.map((entry) => {
                 const expired = isExpired(entry);
@@ -190,6 +220,21 @@ export function GenerationHistory({
                         >
                           {entry.audioSettings.format}
                         </Badge>
+                        {onDelete && (
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDelete(entry.id);
+                            }}
+                            className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-[11px] text-muted-foreground transition-colors hover:bg-muted hover:text-destructive"
+                            aria-label="Delete history item"
+                            data-testid={`delete-history-item-${entry.id}`}
+                          >
+                            <Trash2 className="h-3 w-3" />
+                            Delete
+                          </button>
+                        )}
                         {expired && (
                           <Badge
                             variant="destructive"

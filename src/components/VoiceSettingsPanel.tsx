@@ -14,8 +14,8 @@ import {
 import { Separator } from '@/components/ui/separator';
 import { ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { EMOTIONS, AUDIO_FORMATS, EMOTION_LABELS, SOUND_EFFECTS, SOUND_EFFECT_LABELS } from '@/lib/constants';
-import type { VoiceSettings, AudioSettings, Emotion, AudioFormat, VoiceModify, SoundEffect } from '@/lib/types';
+import { EMOTIONS, AUDIO_FORMATS, EMOTION_LABELS, SOUND_EFFECTS, SOUND_EFFECT_LABELS, LANGUAGE_BOOST_OPTIONS } from '@/lib/constants';
+import type { VoiceSettings, AudioSettings, Emotion, AudioFormat, VoiceModify, SoundEffect, LanguageBoost } from '@/lib/types';
 
 function toNumber(v: number | readonly number[]): number {
   return typeof v === 'number' ? v : v[0];
@@ -30,6 +30,13 @@ const EMOTION_ITEM_LABELS: Record<string, React.ReactNode> = {
 
 const FORMAT_ITEM_LABELS: Record<string, React.ReactNode> = Object.fromEntries(
   AUDIO_FORMATS.map((f) => [f, f.toUpperCase()]),
+);
+
+const LANGUAGE_BOOST_ITEM_LABELS: Record<string, React.ReactNode> = Object.fromEntries(
+  LANGUAGE_BOOST_OPTIONS.map((language) => [
+    language,
+    language === 'auto' ? 'Auto detect' : language.replace(',', ' / '),
+  ]),
 );
 
 const SOUND_EFFECT_ITEM_LABELS: Record<string, React.ReactNode> = {
@@ -59,22 +66,11 @@ export function VoiceSettingsPanel({
 
   return (
     <Card>
-      <CardHeader className="pb-3">
-        <CardTitle className="text-base font-semibold tracking-tight">Voice Controls</CardTitle>
-        <p className="text-[12px] leading-5 text-muted-foreground">
-          Start with delivery and format. Open advanced effects only when you need to shape the tone further.
-        </p>
+      <CardHeader className="pb-2">
+        <CardTitle className="text-[15px] font-semibold tracking-tight">Voice Controls</CardTitle>
       </CardHeader>
       <CardContent className="space-y-5">
-        <div className="space-y-4 rounded-2xl border border-border/80 bg-muted/35 p-4">
-          <div className="space-y-1">
-            <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
-              Basic Settings
-            </p>
-            <p className="text-[13px] text-muted-foreground">
-              Tune pacing, level, tonal balance, emotion, and output format.
-            </p>
-          </div>
+        <div className="space-y-4 rounded-xl border border-border/80 bg-muted/20 p-4">
 
         <div className="space-y-2">
           <div className="flex items-center justify-between">
@@ -195,19 +191,37 @@ export function VoiceSettingsPanel({
             </SelectContent>
             </Select>
           </div>
+
+          <div className="space-y-2">
+            <Label className="text-[13px] font-medium text-foreground">Language Boost</Label>
+            <Select
+              value={voiceSettings.languageBoost ?? 'auto'}
+              items={LANGUAGE_BOOST_ITEM_LABELS}
+              onValueChange={(value) => {
+                if (!value) return;
+                onVoiceChange({
+                  ...voiceSettings,
+                  languageBoost: value as LanguageBoost,
+                });
+              }}
+            >
+              <SelectTrigger data-testid="language-boost-select" className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {LANGUAGE_BOOST_OPTIONS.map((language) => (
+                  <SelectItem key={language} value={language}>
+                    {language === 'auto' ? 'Auto detect' : language.replace(',', ' / ')}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </div>
 
         <Separator />
 
-        <div className="space-y-3 rounded-2xl border border-border/80 bg-card p-4">
-          <div className="space-y-1">
-            <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
-              Advanced Effects
-            </p>
-            <p className="text-[13px] text-muted-foreground">
-              Push the voice brighter, softer, or more stylized when the base delivery is not enough.
-            </p>
-          </div>
+        <div className="space-y-3 rounded-xl border border-border/80 bg-card p-4">
 
         <div>
           <button

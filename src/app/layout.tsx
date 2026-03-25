@@ -1,7 +1,14 @@
 import type { Metadata } from "next";
-import { Geist_Mono, Noto_Sans_KR } from "next/font/google";
+import { Geist_Mono, Inter, Noto_Sans_KR } from "next/font/google";
 import { Toaster } from "sonner";
 import "./globals.css";
+
+const inter = Inter({
+  variable: "--font-inter",
+  subsets: ["latin"],
+  display: "swap",
+  weight: ["400", "500", "600", "700"],
+});
 
 const notoSans = Noto_Sans_KR({
   variable: "--font-noto-sans-kr",
@@ -28,7 +35,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${notoSans.variable} ${geistMono.variable} antialiased`}
+        className={`${inter.variable} ${notoSans.variable} ${geistMono.variable} antialiased`}
       >
         {children}
         <Toaster richColors position="top-right" />

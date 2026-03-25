@@ -61,6 +61,41 @@ test.describe('VibeVoice Dashboard', () => {
     await expect(page.getByTestId('char-count')).toContainText('11');
   });
 
+  test('interjection buttons insert tags into the script', async ({ page }) => {
+    await page.goto('/');
+    const textarea = page.getByTestId('text-input');
+    await textarea.fill('Hello world');
+    await page.getByTestId('text-input').evaluate((element) => {
+      const textareaElement = element as HTMLTextAreaElement;
+      textareaElement.focus();
+      textareaElement.setSelectionRange(5, 5);
+    });
+    await page.getByTestId('interjection-btn-sighs').click();
+    await expect(textarea).toHaveValue('Hello (sighs) world');
+  });
+
+  test('language boost selection is sent in the generation payload', async ({ page }) => {
+    let requestBody: Record<string, unknown> | null = null;
+
+    await page.route('/api/t2a', async (route) => {
+      requestBody = route.request().postDataJSON() as Record<string, unknown>;
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify(MOCK_SUCCESS_RESPONSE),
+      });
+    });
+
+    await page.goto('/');
+    await page.getByTestId('language-boost-select').click();
+    await page.getByRole('option', { name: 'Korean' }).click();
+    await page.getByTestId('text-input').fill('안녕하세요. 테스트입니다.');
+    await page.getByTestId('generate-btn').click();
+
+    await expect(page.getByTestId('audio-player')).toBeVisible({ timeout: 10000 });
+    expect(requestBody?.['languageBoost']).toBe('Korean');
+  });
+
   test('generate button is enabled with valid text', async ({ page }) => {
     await page.goto('/');
     await page.getByTestId('text-input').fill('Hello, this is a test');
