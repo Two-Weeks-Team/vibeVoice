@@ -10,31 +10,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { RefreshCw, Trash2, Mic, Wand2, Copy, Pencil, Play, Square, Loader2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
+import { formatVoiceLabel } from '@/lib/voiceLabel';
+import { NICKNAMES_KEY, NICKNAMES_EVENT, invalidateVoicesCache } from '@/hooks/useVoiceNames';
 import type { VoiceInfo } from '@/lib/types';
-
-function formatVoiceLabel(voice: VoiceInfo, nicknames: Record<string, string>): string {
-  const nickname = nicknames[voice.voice_id];
-  if (nickname) return nickname;
-
-  if (voice.voice_name) return voice.voice_name;
-
-  const id = voice.voice_id;
-
-  if (/^[A-Z]/.test(id) && id.includes('_') && !id.includes('-')) {
-    return id.replace(/_/g, ' ');
-  }
-
-  if (id.startsWith('moss_audio_')) {
-    const suffix = id.slice(-8);
-    return `Voice ...${suffix}`;
-  }
-
-  if (id.length > 30) {
-    return `${id.slice(0, 12)}...${id.slice(-8)}`;
-  }
-
-  return id.replace(/[_-]/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
-}
 
 interface VoiceLibraryPanelProps {
   selectedVoiceId: string;
@@ -84,22 +62,23 @@ export function VoiceLibraryPanel({ selectedVoiceId, onVoiceSelect, embedded = f
   const saveNickname = useCallback((voiceId: string, name: string) => {
     const trimmed = name.trim();
     try {
-      const raw = localStorage.getItem('vibeVoice:voiceNicknames');
+      const raw = localStorage.getItem(NICKNAMES_KEY);
       const nicks = raw ? JSON.parse(raw) : {};
       if (trimmed) {
         nicks[voiceId] = trimmed;
       } else {
         delete nicks[voiceId];
       }
-      localStorage.setItem('vibeVoice:voiceNicknames', JSON.stringify(nicks));
+      localStorage.setItem(NICKNAMES_KEY, JSON.stringify(nicks));
       setNicknames(nicks);
+      window.dispatchEvent(new Event(NICKNAMES_EVENT));
     } catch {}
     setEditingId(null);
   }, []);
 
   const loadNicknames = useCallback(() => {
     try {
-      const raw = localStorage.getItem('vibeVoice:voiceNicknames');
+      const raw = localStorage.getItem(NICKNAMES_KEY);
       if (raw) setNicknames(JSON.parse(raw));
     } catch {}
   }, []);
@@ -143,14 +122,16 @@ export function VoiceLibraryPanel({ selectedVoiceId, onVoiceSelect, embedded = f
       }
       toast.success('Voice deleted');
       try {
-        const nicknamesRaw = localStorage.getItem('vibeVoice:voiceNicknames');
+        const nicknamesRaw = localStorage.getItem(NICKNAMES_KEY);
         if (nicknamesRaw) {
           const nicks = JSON.parse(nicknamesRaw);
           delete nicks[voiceId];
-          localStorage.setItem('vibeVoice:voiceNicknames', JSON.stringify(nicks));
+          localStorage.setItem(NICKNAMES_KEY, JSON.stringify(nicks));
           setNicknames(nicks);
+          window.dispatchEvent(new Event(NICKNAMES_EVENT));
         }
       } catch {}
+      invalidateVoicesCache();
       fetchVoices();
     } catch {
       toast.error('Network error deleting voice');
@@ -286,7 +267,7 @@ export function VoiceLibraryPanel({ selectedVoiceId, onVoiceSelect, embedded = f
                     ) : (
                       <>
                         <div className="flex items-center gap-1">
-                          <p className="truncate font-medium text-[13px] text-foreground">
+                          <p className="truncate font-medium text-sm text-foreground">
                             {formatVoiceLabel(voice, nicknames)}
                           </p>
                           {voiceType && (
@@ -314,11 +295,11 @@ export function VoiceLibraryPanel({ selectedVoiceId, onVoiceSelect, embedded = f
                           )}
                         </div>
                         {voice.description && voice.description.length > 0 ? (
-                          <p className="truncate text-[11px] text-muted-foreground leading-snug">
+                          <p className="truncate text-xs text-muted-foreground leading-snug">
                             {voice.description.join(' · ')}
                           </p>
                         ) : (
-                          <p className="truncate text-[11px] text-muted-foreground leading-snug">
+                          <p className="truncate text-xs text-muted-foreground leading-snug">
                             {voice.created_time
                               ? `Created ${voice.created_time}`
                               : voice.voice_id.length > 20
@@ -361,7 +342,7 @@ export function VoiceLibraryPanel({ selectedVoiceId, onVoiceSelect, embedded = f
                       )}
                     </span>
                     {isSelected && (
-                      <Badge variant="default" className="text-[10px] px-1.5 py-0">
+                      <Badge variant="default" className="text-xs px-1.5 py-0">
                         Active
                       </Badge>
                     )}
@@ -419,7 +400,7 @@ export function VoiceLibraryPanel({ selectedVoiceId, onVoiceSelect, embedded = f
       )}
       <CardContent className={cn(embedded && 'px-0 pb-0 pt-0')}>
         <div className="mb-3 flex items-center justify-between">
-          <p className="text-[12px] font-medium text-muted-foreground">Browse, preview, and switch voices</p>
+          <p className="text-xs font-medium text-muted-foreground">Browse, preview, and switch voices</p>
           <Button
             variant="ghost"
             size="icon"

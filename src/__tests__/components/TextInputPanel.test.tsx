@@ -84,9 +84,15 @@ describe('TextInputPanel', () => {
 
   it('renders interjection picker buttons', () => {
     render(<TextInputPanel {...defaultProps} />);
+    fireEvent.click(screen.getByTestId('interjection-toggle'));
     expect(screen.getByTestId('interjection-picker')).toBeInTheDocument();
     expect(screen.getByTestId('interjection-btn-sighs')).toBeInTheDocument();
     expect(screen.getByTestId('interjection-btn-gasps')).toBeInTheDocument();
+  });
+
+  it('interjection picker is collapsed by default', () => {
+    render(<TextInputPanel {...defaultProps} />);
+    expect(screen.queryByTestId('interjection-picker')).not.toBeInTheDocument();
   });
 
   it('inserts an interjection tag at the cursor position', () => {
@@ -104,6 +110,8 @@ describe('TextInputPanel', () => {
     }
 
     render(<ControlledPanel />);
+
+    fireEvent.click(screen.getByTestId('interjection-toggle'));
 
     const textarea = screen.getByTestId('text-input') as HTMLTextAreaElement;
     textarea.focus();
@@ -129,6 +137,8 @@ describe('TextInputPanel', () => {
     }
 
     render(<ControlledPanel />);
+
+    fireEvent.click(screen.getByTestId('interjection-toggle'));
 
     const textarea = screen.getByTestId('text-input') as HTMLTextAreaElement;
     const start = textarea.value.indexOf('placeholder');

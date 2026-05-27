@@ -10,6 +10,7 @@ import { VoiceLibraryPanel } from '@/components/VoiceLibraryPanel';
 import { VoiceDesignDialog } from '@/components/VoiceDesignDialog';
 import { VoiceCloneDialog } from '@/components/VoiceCloneDialog';
 import { useHistory } from '@/hooks/useHistory';
+import { useVoiceNames, invalidateVoicesCache } from '@/hooks/useVoiceNames';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -32,15 +33,7 @@ import type {
   VoiceModify,
   VoiceSettings,
 } from '@/lib/types';
-import { ChevronRight, LogOut, Sparkles, Waves } from 'lucide-react';
-
-function formatActiveVoiceLabel(voiceId: string) {
-  if (voiceId.startsWith('moss_audio_')) {
-    return `Voice ${voiceId.slice(-8)}`;
-  }
-
-  return voiceId.replace(/[_-]/g, ' ').replace(/\b\w/g, (char) => char.toUpperCase());
-}
+import { ChevronRight, LogOut, Waves } from 'lucide-react';
 
 export default function Home() {
   const [text, setText] = useState('');
@@ -60,6 +53,7 @@ export default function Home() {
     hasCorruptBackup,
     recoverFromCorruptBackup,
   } = useHistory();
+  const { resolve: resolveVoiceName } = useVoiceNames();
 
   const hasEffects = useMemo(
     () =>
@@ -128,6 +122,7 @@ export default function Home() {
   };
 
   const handleVoiceCreatedOrCloned = () => {
+    invalidateVoicesCache();
     setVoiceLibraryKey((prev) => prev + 1);
   };
 
@@ -155,27 +150,26 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <header className="sticky top-0 z-50 border-b border-border bg-background/95 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-3 sm:px-6">
+      {/* Header */}
+      <header className="sticky top-0 z-50 border-b border-border bg-card/80 backdrop-blur-xl shadow-sm shadow-black/5">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-3.5">
           <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-muted text-foreground">
-              <Waves className="h-4.5 w-4.5" />
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-foreground text-background">
+              <Waves className="h-4 w-4" />
             </div>
-            <div>
-              <h1 className="text-[15px] font-semibold tracking-tight">VibeVoice</h1>
-              <p className="text-[12px] text-muted-foreground">Voice generation workspace</p>
-            </div>
+            <h1 className="font-display text-lg font-bold tracking-tight">VibeVoice</h1>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5">
             <VoiceDesignDialog onVoiceCreated={handleVoiceCreatedOrCloned} />
             <VoiceCloneDialog onVoiceCloned={handleVoiceCreatedOrCloned} />
+            <div className="mx-1 h-5 w-px bg-border" />
             <button
               onClick={async () => {
                 await fetch('/api/auth/logout', { method: 'POST' });
                 window.location.href = '/login';
               }}
-              className="rounded-full p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+              className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
               aria-label="Sign out"
             >
               <LogOut className="h-4 w-4" />
@@ -184,38 +178,39 @@ export default function Home() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-6xl px-5 py-6 sm:px-6">
-        <div className="mb-5 flex flex-col gap-3 rounded-2xl border border-border bg-card px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex min-w-0 items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-muted text-foreground">
-              <Sparkles className="h-4 w-4" />
+      <main className="mx-auto max-w-7xl px-6 py-8">
+        {/* Voice Selection Bar */}
+        <div className="mb-8 flex flex-col gap-4 rounded-2xl border border-border bg-card p-5 shadow-md shadow-black/5 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex min-w-0 items-center gap-4">
+            <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-accent">
+              <Waves className="h-5 w-5 text-foreground/70" />
             </div>
             <div className="min-w-0">
-              <p className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">Selected voice</p>
-              <div className="flex items-center gap-2">
-                <p className="truncate text-[15px] font-semibold text-foreground">
-                  {formatActiveVoiceLabel(voiceSettings.voiceId)}
-                </p>
-                {voiceSettings.emotion && (
-                  <Badge variant="secondary" className="text-[10px] uppercase">
-                    {voiceSettings.emotion}
-                  </Badge>
-                )}
-              </div>
+              <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground">
+                Active Voice
+              </p>
+              <p className="mt-0.5 truncate font-display text-lg font-semibold text-foreground">
+                {resolveVoiceName(voiceSettings.voiceId)}
+              </p>
             </div>
+            {voiceSettings.emotion && (
+              <Badge variant="secondary" className="ml-1 text-xs capitalize">
+                {voiceSettings.emotion}
+              </Badge>
+            )}
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
             <Dialog>
               <DialogTrigger
-                render={<Button variant="outline" className="px-4 text-[13px] font-medium shadow-none" />}
+                render={<Button variant="outline" className="h-9 gap-1.5 px-4 text-sm font-medium shadow-none" />}
               >
                 Browse voices
-                <ChevronRight className="ml-1 h-4 w-4" />
+                <ChevronRight className="h-3.5 w-3.5" />
               </DialogTrigger>
               <DialogContent className="w-full max-w-[calc(100vw-2rem)] overflow-hidden border-border bg-background p-0 sm:max-h-[85vh] sm:max-w-[960px]">
                 <DialogHeader className="border-b border-border px-6 py-5">
-                  <DialogTitle className="text-lg font-semibold tracking-tight">Voice Library</DialogTitle>
+                  <DialogTitle className="font-display text-xl font-bold tracking-tight">Voice Library</DialogTitle>
                   <DialogDescription className="text-sm text-muted-foreground">
                     Preview, rename, and switch between system, cloned, and designed voices.
                   </DialogDescription>
@@ -230,24 +225,31 @@ export default function Home() {
                 </div>
               </DialogContent>
             </Dialog>
-            <Badge variant="outline" className="px-3 py-1 text-[11px] font-medium text-muted-foreground">
-              {audioSettings.format.toUpperCase()} · {voiceSettings.speed.toFixed(1)}x
+            <Badge variant="outline" className="h-7 px-2.5 text-xs font-medium text-muted-foreground">
+              {audioSettings.format.toUpperCase()}
             </Badge>
+            {voiceSettings.speed !== 1.0 && (
+              <Badge variant="outline" className="h-7 px-2.5 text-xs font-medium text-muted-foreground">
+                {voiceSettings.speed.toFixed(1)}× speed
+              </Badge>
+            )}
             {voiceSettings.languageBoost && voiceSettings.languageBoost !== 'auto' && (
-              <Badge variant="outline" className="px-3 py-1 text-[11px] font-medium text-muted-foreground">
+              <Badge variant="outline" className="h-7 px-2.5 text-xs font-medium text-muted-foreground">
                 {voiceSettings.languageBoost.replace(',', ' / ')}
               </Badge>
             )}
             {hasEffects && (
-              <Badge variant="secondary" className="px-3 py-1 text-[11px] font-medium">
-                Effects on
+              <Badge variant="secondary" className="h-7 gap-1.5 px-2.5 text-xs font-medium">
+                <span className="h-1.5 w-1.5 rounded-full bg-chart-1" />
+                Effects
               </Badge>
             )}
           </div>
         </div>
 
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_340px] xl:grid-cols-[minmax(0,1fr)_360px]">
-          <div className="space-y-5">
+        {/* Main Grid */}
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_380px]">
+          <div className="space-y-6">
             <TextInputPanel
               text={text}
               onChange={setText}
@@ -257,13 +259,14 @@ export default function Home() {
 
             {currentAudio && (
               <AudioPlayer
+                key={currentAudio.audioUrl}
                 audioResult={currentAudio}
                 format={audioSettings.format}
               />
             )}
           </div>
 
-          <div className="space-y-5 lg:sticky lg:top-20 lg:self-start">
+          <div className="space-y-6 lg:sticky lg:top-20 lg:self-start">
             <VoiceSettingsPanel
               voiceSettings={voiceSettings}
               audioSettings={audioSettings}
@@ -282,9 +285,10 @@ export default function Home() {
                 isExpired={isExpired}
                 hasCorruptBackup={hasCorruptBackup}
                 onRecoverBackup={handleRecoverHistory}
+                resolveVoiceName={resolveVoiceName}
               />
             ) : (
-              <div className="h-40 animate-pulse rounded-2xl border border-border bg-card" />
+              <div className="h-40 animate-pulse rounded-xl border border-border bg-card" />
             )}
           </div>
         </div>

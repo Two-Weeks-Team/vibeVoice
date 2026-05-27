@@ -134,8 +134,8 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     },
     audio_setting: {
       format: (body.format as string) ?? 'mp3',
-      sample_rate: 32000,
-      bitrate: 128000,
+      sample_rate: 44100,
+      bitrate: 256000,
       channel: 1,
     },
     // Add voice_modify if any non-default values are set

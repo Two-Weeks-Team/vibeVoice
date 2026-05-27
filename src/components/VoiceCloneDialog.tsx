@@ -155,14 +155,14 @@ export function VoiceCloneDialog({ onVoiceCloned }: VoiceCloneDialogProps) {
   return (
     <Dialog open={open} onOpenChange={(o) => (o ? setOpen(true) : handleClose())}>
       <DialogTrigger
-        render={<Button variant="outline" size="sm" className="gap-1.5 px-4 text-[13px] font-medium shadow-none" />}
+        render={<Button variant="ghost" size="sm" className="h-9 gap-1.5 px-3 text-sm font-medium text-muted-foreground hover:text-foreground" />}
       >
         <Copy className="h-3.5 w-3.5" />
-        Clone Voice
+        Clone
       </DialogTrigger>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>Clone a Voice</DialogTitle>
+          <DialogTitle className="font-display font-bold">Clone a Voice</DialogTitle>
           <DialogDescription>
             Upload an audio sample (10s–5min, MP3/M4A/WAV, ≤20MB) to clone a
             voice. Cloned voices auto-delete after 7 days if unused.

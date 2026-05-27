@@ -1,12 +1,11 @@
 'use client';
 
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 
 import { Card, CardContent } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { Loader2 } from 'lucide-react';
+import { ChevronDown, Loader2 } from 'lucide-react';
 import { MAX_TEXT_LENGTH, CHAR_WARNING_THRESHOLD, INTERJECTION_TAGS } from '@/lib/constants';
 import { cn } from '@/lib/utils';
 
@@ -19,6 +18,7 @@ interface TextInputPanelProps {
 
 export function TextInputPanel({ text, onChange, onGenerate, isLoading }: TextInputPanelProps) {
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+  const [interjectionsOpen, setInterjectionsOpen] = useState(false);
   const charCount = text.length;
   const isOverLimit = charCount > MAX_TEXT_LENGTH;
   const isWarning = charCount > CHAR_WARNING_THRESHOLD;
@@ -53,54 +53,79 @@ export function TextInputPanel({ text, onChange, onGenerate, isLoading }: TextIn
   };
 
   return (
-    <Card className="shadow-none">
-      <CardContent className="space-y-4 pt-5">
-        <div className="flex items-center justify-between">
-          <Label htmlFor="script-input" className="text-[14px] font-semibold text-foreground">
+    <Card className="overflow-hidden rounded-2xl border-border bg-card shadow-md shadow-black/5">
+      <CardContent className="p-0">
+        {/* Script Header */}
+        <div className="flex items-center justify-between border-b border-border/60 px-5 py-3.5">
+          <h2 className="font-display text-base font-bold text-foreground">
             Script
-          </Label>
-          <span className="text-[11px] text-muted-foreground">
-            Paste a draft or start from scratch
+          </h2>
+          <span className="text-sm text-muted-foreground">
+            Paste or type your content
           </span>
         </div>
-        <div className="space-y-3 rounded-xl border border-border/70 bg-muted/20 p-3">
-          <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <p className="text-[13px] font-medium text-foreground">Interjection Tags</p>
-              <p className="text-[12px] text-muted-foreground">
-                Click a tag to insert MiniMax actions like sighs, gasps, or laughs.
-              </p>
-            </div>
-            <span className="text-[11px] text-muted-foreground">Inserted at your cursor</span>
-          </div>
-          <div data-testid="interjection-picker" className="flex flex-wrap gap-2">
-            {INTERJECTION_TAGS.map((item) => (
-              <Button
-                key={item.tag}
-                type="button"
-                variant="outline"
-                size="sm"
-                className="rounded-full px-3 shadow-none"
-                data-testid={`interjection-btn-${item.tag}`}
-                onClick={() => insertInterjection(item.tag)}
-              >
-                <span>{item.label}</span>
-                <span className="font-mono text-[11px] text-muted-foreground">({item.tag})</span>
-              </Button>
-            ))}
-          </div>
-        </div>
+
+        {/* Textarea */}
         <Textarea
           ref={textareaRef}
           id="script-input"
           data-testid="text-input"
           value={text}
           onChange={(e) => onChange(e.target.value)}
-          placeholder="Paste your script or start typing..."
-          className="min-h-[260px] resize-y text-[15px] leading-7 shadow-none p-5"
+          placeholder="Start writing or paste your script here..."
+          className="min-h-[280px] resize-y rounded-none border-0 bg-transparent px-5 py-4 text-[15px] leading-relaxed text-foreground shadow-none ring-0 placeholder:text-muted-foreground/50 focus-visible:ring-0"
           rows={10}
         />
-        <div className="flex items-center justify-between gap-3 border-t border-border pt-1">
+
+        {/* Interjection Tags (collapsible) */}
+        <div className="border-t border-border/60 px-5 py-3">
+          <button
+            type="button"
+            data-testid="interjection-toggle"
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={() => setInterjectionsOpen((open) => !open)}
+            aria-expanded={interjectionsOpen}
+            className="flex w-full items-center justify-between py-0.5 text-left"
+          >
+            <span className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-foreground/60">
+              Interjections
+              <span className="font-normal normal-case tracking-normal text-muted-foreground/70">
+                {INTERJECTION_TAGS.length} sounds
+              </span>
+            </span>
+            <span className="flex items-center gap-2">
+              <span className="text-xs font-normal text-muted-foreground">Insert at cursor</span>
+              <ChevronDown
+                className={cn(
+                  'h-4 w-4 text-muted-foreground transition-transform duration-200',
+                  interjectionsOpen && 'rotate-180',
+                )}
+              />
+            </span>
+          </button>
+          {interjectionsOpen && (
+            <div data-testid="interjection-picker" className="mt-3 flex flex-wrap gap-1.5">
+              {INTERJECTION_TAGS.map((item) => (
+                <Button
+                  key={item.tag}
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="h-7 rounded-full border-border px-3 text-xs shadow-none hover:bg-accent"
+                  data-testid={`interjection-btn-${item.tag}`}
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={() => insertInterjection(item.tag)}
+                  title={`Inserts (${item.tag})`}
+                >
+                  {item.label}
+                </Button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Footer */}
+        <div className="flex items-center justify-between border-t border-border/60 px-5 py-3">
           <span
             data-testid="char-count"
             className={cn(
@@ -111,22 +136,30 @@ export function TextInputPanel({ text, onChange, onGenerate, isLoading }: TextIn
           >
             {charCount.toLocaleString()} / {MAX_TEXT_LENGTH.toLocaleString()}
           </span>
-          <Button
-            data-testid="generate-btn"
-            onClick={onGenerate}
-            disabled={!canGenerate}
-            size="lg"
-            className="px-6 text-[13px] font-medium shadow-none"
-          >
-            {isLoading ? (
-              <>
-                <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
-                Generating...
-              </>
-            ) : (
-              'Generate Audio'
+          <div className="flex items-center gap-3">
+            {text.trim().length === 0 && !isLoading && (
+              <span className="hidden text-xs text-muted-foreground sm:inline">
+                Enter text to generate
+              </span>
             )}
-          </Button>
+            <Button
+              data-testid="generate-btn"
+              onClick={onGenerate}
+              disabled={!canGenerate}
+              size="default"
+              title={text.trim().length === 0 ? 'Enter text to generate' : undefined}
+              className="h-9 gap-2 bg-primary px-5 text-sm font-semibold text-primary-foreground shadow-none hover:bg-primary/90"
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  Generating...
+                </>
+              ) : (
+                'Generate Audio'
+              )}
+            </Button>
+          </div>
         </div>
       </CardContent>
     </Card>

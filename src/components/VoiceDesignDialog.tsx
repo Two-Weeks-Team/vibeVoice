@@ -93,14 +93,14 @@ export function VoiceDesignDialog({ onVoiceCreated }: VoiceDesignDialogProps) {
   return (
     <Dialog open={open} onOpenChange={(o) => (o ? setOpen(true) : handleClose())}>
       <DialogTrigger
-        render={<Button variant="outline" size="sm" className="gap-1.5 px-4 text-[13px] font-medium shadow-none" />}
+        render={<Button variant="ghost" size="sm" className="h-9 gap-1.5 px-3 text-sm font-medium text-muted-foreground hover:text-foreground" />}
       >
         <Wand2 className="h-3.5 w-3.5" />
-        Design Voice
+        Design
       </DialogTrigger>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>Design a New Voice</DialogTitle>
+          <DialogTitle className="font-display font-bold">Design a New Voice</DialogTitle>
           <DialogDescription>
             Describe the voice you want and generate a preview. The created voice will appear in your Voice Library.
           </DialogDescription>

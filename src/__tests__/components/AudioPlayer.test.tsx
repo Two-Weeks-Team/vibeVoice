@@ -23,16 +23,15 @@ describe('AudioPlayer', () => {
   });
 
   it('renders audio element with correct src', () => {
-    render(<AudioPlayer audioResult={mockResult} format="mp3" />);
-    const audio = screen.getByTestId('audio-player');
+    const { container } = render(<AudioPlayer audioResult={mockResult} format="mp3" />);
+    const audio = container.querySelector('audio');
     expect(audio).toBeInTheDocument();
     expect(audio).toHaveAttribute('src', mockResult.audioUrl);
   });
 
-  it('audio element has controls attribute', () => {
+  it('renders a play/pause control', () => {
     render(<AudioPlayer audioResult={mockResult} format="mp3" />);
-    const audio = screen.getByTestId('audio-player');
-    expect(audio).toHaveAttribute('controls');
+    expect(screen.getByRole('button', { name: /play/i })).toBeInTheDocument();
   });
 
   it('download link has data-testid="download-btn"', () => {

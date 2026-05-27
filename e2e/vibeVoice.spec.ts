@@ -70,6 +70,7 @@ test.describe('VibeVoice Dashboard', () => {
       textareaElement.focus();
       textareaElement.setSelectionRange(5, 5);
     });
+    await page.getByTestId('interjection-toggle').click();
     await page.getByTestId('interjection-btn-sighs').click();
     await expect(textarea).toHaveValue('Hello (sighs) world');
   });
@@ -143,9 +144,9 @@ test.describe('VibeVoice Dashboard', () => {
     await page.goto('/');
     await page.getByTestId('text-input').fill('Test audio generation');
     await page.getByTestId('generate-btn').click();
-    const audio = page.getByTestId('audio-player');
-    await expect(audio).toBeVisible({ timeout: 10000 });
-    await expect(audio).toHaveAttribute('src', MOCK_AUDIO_URL);
+    const player = page.getByTestId('audio-player');
+    await expect(player).toBeVisible({ timeout: 10000 });
+    await expect(player.locator('audio')).toHaveAttribute('src', MOCK_AUDIO_URL);
   });
 
   test('history item added after generation', async ({ page }) => {
