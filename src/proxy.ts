@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const PUBLIC_PATHS = ['/login', '/api/auth/login', '/api/auth/logout'];
+// '/api/internal' is bypassed here because those routes enforce their own
+// x-api-key (INTERNAL_API_KEY) auth — not the cookie session. See api/internal/*.
+const PUBLIC_PATHS = ['/login', '/api/auth/login', '/api/auth/logout', '/api/internal'];
 
 export function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
